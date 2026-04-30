@@ -8,32 +8,20 @@ import { CalendarHeatmap } from "@/components/charts/CalendarHeatmap";
 import { SymbolBreakdown } from "@/components/charts/SymbolBreakdown";
 import { DayOfWeekChart } from "@/components/charts/DayOfWeekChart";
 import { WinRateChart } from "@/components/charts/WinRateChart";
-import { useDashboard } from "@/context/DashboardContext";
-import { cn } from "@/lib/utils";
 
 export function DashboardContent() {
-  const { settings } = useDashboard();
-  const gap = settings.density === "compact" ? "gap-3" : settings.density === "spacious" ? "gap-6" : "gap-4";
-
   return (
-    <div className={cn("flex flex-col", gap)}>
-      {/* Stats row */}
+    <div className="flex flex-col gap-4">
       <StatsOverview />
-
-      {/* Primary charts: equity + calendar */}
-      <div className={cn("grid grid-cols-1 xl:grid-cols-2", gap)}>
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
         <EquityCurve />
         <CalendarHeatmap />
       </div>
-
-      {/* Secondary charts */}
-      <div className={cn("grid grid-cols-1 lg:grid-cols-2", gap)}>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <DailyPnLBar />
         <MonthlyPnLBar />
       </div>
-
-      {/* Bottom row */}
-      <div className={cn("grid grid-cols-1 md:grid-cols-3", gap)}>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <SymbolBreakdown />
         <DayOfWeekChart />
         <WinRateChart />

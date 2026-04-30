@@ -66,11 +66,12 @@ export interface Stats {
   lossDays: number;
 }
 
-export type Density = "compact" | "comfortable" | "spacious";
+export type Theme = "dark" | "light";
 
 export interface Settings {
-  density: Density;
+  theme: Theme;
   privacyMode: boolean;
+  userName: string;
 }
 
 export interface TimeRange {

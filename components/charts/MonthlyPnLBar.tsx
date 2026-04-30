@@ -22,12 +22,12 @@ function CustomTooltip({ active, payload, privacy }: any) {
   );
 }
 
-export function MonthlyPnLBar() {
+export function MonthlyPnLBar({ height = 200 }: { height?: number }) {
   const { monthly, settings } = useDashboard();
 
   return (
     <ChartCard title="Monthly P&L" subtitle="P&L per calendar month">
-      <ResponsiveContainer width="100%" height={200}>
+      <ResponsiveContainer width="100%" height={height}>
         <BarChart data={monthly} margin={{ top: 16, right: 4, left: 0, bottom: 0 }} barCategoryGap="25%">
           <CartesianGrid strokeDasharray="3 3" stroke="#2a2a35" vertical={false} />
           <XAxis

@@ -1,13 +1,25 @@
 "use client";
 
+import { useState } from "react";
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
-  ResponsiveContainer, ReferenceLine,
+  ResponsiveContainer,
 } from "recharts";
 import { useDashboard } from "@/context/DashboardContext";
 import { ChartCard } from "@/components/ui/ChartCard";
 import { fmtMoney } from "@/lib/utils";
-import { format, parseISO } from "date-fns";
+import { cn } from "@/lib/utils";
+import { format, parseISO, subDays } from "date-fns";
+
+const RANGES = [
+  { label: "1W", days: 7 },
+  { label: "1M", days: 30 },
+  { label: "3M", days: 90 },
+  { label: "6M", days: 180 },
+  { label: "1Y", days: 365 },
+  { label: "3Y", days: 1095 },
+  { label: "All", days: null },
+];
 
 function CustomTooltip({ active, payload, label, privacy }: any) {
   if (!active || !payload?.length) return null;
@@ -22,26 +34,59 @@ function CustomTooltip({ active, payload, label, privacy }: any) {
   );
 }
 
-export function EquityCurve() {
-  const { equity, settings } = useDashboard();
+function fmtAxis(v: number, privacy: boolean): string {
+  if (privacy) return "••";
+  if (v === 0) return "$0";
+  if (Math.abs(v) >= 1000) return `$${(v / 1000).toFixed(0)}k`;
+  return `$${v.toFixed(0)}`;
+}
 
-  const data = equity.map((p) => ({
+export function EquityCurve({ height = 220 }: { height?: number }) {
+  const { equity, settings } = useDashboard();
+  const [rangeDays, setRangeDays] = useState<number | null>(null);
+
+  const filtered = rangeDays
+    ? equity.filter((p) => parseISO(p.date) >= subDays(new Date(), rangeDays))
+    : equity;
+
+  const data = filtered.map((p) => ({
     ...p,
     date: format(parseISO(p.date), "MMM d"),
-    fill: p.cumPnl >= 0 ? "#22c55e" : "#ef4444",
   }));
 
-  const maxAbs = Math.max(...equity.map((p) => Math.abs(p.cumPnl)), 1);
-  const isPositive = (equity[equity.length - 1]?.cumPnl ?? 0) >= 0;
+  const isAll = rangeDays === null;
+  const maxVal = Math.max(...filtered.map((p) => p.cumPnl), 0);
+  const step = maxVal > 5000 ? 1000 : maxVal > 1000 ? 500 : 100;
+  const domainTop = Math.ceil((maxVal * 1.1) / step) * step || step;
+  const yDomain: [number | string, number | string] = isAll ? [0, domainTop] : ["auto", "auto"];
+
+  const rangeSelector = (
+    <div className="flex items-center gap-0.5 rounded-lg p-0.5 border border-[#2a2a35]" style={{ background: "var(--bg-base)" }}>
+      {RANGES.map((r) => (
+        <button
+          key={r.label}
+          onClick={() => setRangeDays(r.days)}
+          className={cn(
+            "px-2 py-1 rounded text-[10px] font-medium transition-colors",
+            rangeDays === r.days
+              ? "bg-[#22c55e]/20 text-[#22c55e]"
+              : "text-[#55556a] hover:text-[#9090a8]"
+          )}
+        >
+          {r.label}
+        </button>
+      ))}
+    </div>
+  );
 
   return (
-    <ChartCard title="Equity Curve" subtitle="Cumulative P&L over time">
-      <ResponsiveContainer width="100%" height={220}>
+    <ChartCard title="Equity Curve" subtitle="Cumulative P&L" headerRight={rangeSelector}>
+      <ResponsiveContainer width="100%" height={height}>
         <AreaChart data={data} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
           <defs>
             <linearGradient id="eqGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor={isPositive ? "#22c55e" : "#ef4444"} stopOpacity={0.2} />
-              <stop offset="95%" stopColor={isPositive ? "#22c55e" : "#ef4444"} stopOpacity={0} />
+              <stop offset="5%" stopColor="#22c55e" stopOpacity={0.25} />
+              <stop offset="95%" stopColor="#22c55e" stopOpacity={0} />
             </linearGradient>
           </defs>
           <CartesianGrid strokeDasharray="3 3" stroke="#2a2a35" vertical={false} />
@@ -56,20 +101,20 @@ export function EquityCurve() {
             tick={{ fill: "#9090a8", fontSize: 11 }}
             axisLine={false}
             tickLine={false}
-            tickFormatter={(v) => fmtMoney(v, settings.privacyMode)}
-            width={60}
-            domain={[-maxAbs * 1.1, maxAbs * 1.1]}
+            tickFormatter={(v) => fmtAxis(v, settings.privacyMode)}
+            width={52}
+            domain={yDomain}
+            tickCount={5}
           />
           <Tooltip content={<CustomTooltip privacy={settings.privacyMode} />} />
-          <ReferenceLine y={0} stroke="#2a2a35" strokeDasharray="4 4" />
           <Area
             type="monotone"
             dataKey="cumPnl"
-            stroke={isPositive ? "#22c55e" : "#ef4444"}
+            stroke="#22c55e"
             strokeWidth={2}
             fill="url(#eqGradient)"
             dot={false}
-            activeDot={{ r: 4, fill: isPositive ? "#22c55e" : "#ef4444" }}
+            activeDot={{ r: 4, fill: "#22c55e" }}
           />
         </AreaChart>
       </ResponsiveContainer>

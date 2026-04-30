@@ -22,13 +22,13 @@ function CustomTooltip({ active, payload, privacy }: any) {
   );
 }
 
-export function SymbolBreakdown() {
+export function SymbolBreakdown({ height = 200 }: { height?: number }) {
   const { symbols, settings } = useDashboard();
   const top = symbols.slice(0, 8);
 
   return (
     <ChartCard title="P&L by Symbol" subtitle="Top performers">
-      <ResponsiveContainer width="100%" height={200}>
+      <ResponsiveContainer width="100%" height={height}>
         <BarChart
           data={top}
           layout="vertical"

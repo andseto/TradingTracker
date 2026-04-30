@@ -10,11 +10,17 @@ interface ChartCardProps {
 
 export function ChartCard({ title, subtitle, children, className, headerRight }: ChartCardProps) {
   return (
-    <div className={cn("bg-[#131316] border border-[#2a2a35] rounded-xl overflow-hidden", className)}>
-      <div className="flex items-center justify-between px-4 py-3 border-b border-[#2a2a35]">
+    <div
+      className={cn("rounded-xl overflow-hidden border", className)}
+      style={{ background: "var(--bg-card)", borderColor: "var(--c-border)" }}
+    >
+      <div
+        className="flex items-center justify-between px-4 py-3 border-b"
+        style={{ borderColor: "var(--c-border)" }}
+      >
         <div>
-          <h3 className="text-sm font-semibold text-[#e8e8f0]">{title}</h3>
-          {subtitle && <p className="text-xs text-[#55556a] mt-0.5">{subtitle}</p>}
+          <h3 className="text-sm font-semibold" style={{ color: "var(--text-1)" }}>{title}</h3>
+          {subtitle && <p className="text-xs mt-0.5" style={{ color: "var(--text-3)" }}>{subtitle}</p>}
         </div>
         {headerRight}
       </div>

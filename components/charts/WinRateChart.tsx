@@ -31,13 +31,13 @@ function CustomTooltip({ active, payload }: any) {
   );
 }
 
-export function WinRateChart() {
+export function WinRateChart({ height = 160 }: { height?: number }) {
   const { positions } = useDashboard();
   const data = buildRollingWinRate(positions);
 
   return (
     <ChartCard title="Win Rate" subtitle="20-trade rolling window">
-      <ResponsiveContainer width="100%" height={160}>
+      <ResponsiveContainer width="100%" height={height}>
         <LineChart data={data} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#2a2a35" vertical={false} />
           <XAxis

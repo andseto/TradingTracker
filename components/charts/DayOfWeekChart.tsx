@@ -25,12 +25,12 @@ function CustomTooltip({ active, payload, privacy }: any) {
   );
 }
 
-export function DayOfWeekChart() {
+export function DayOfWeekChart({ height = 160 }: { height?: number }) {
   const { dowPnl, settings } = useDashboard();
 
   return (
     <ChartCard title="P&L by Day of Week" subtitle="Average daily P&L">
-      <ResponsiveContainer width="100%" height={160}>
+      <ResponsiveContainer width="100%" height={height}>
         <BarChart data={dowPnl} margin={{ top: 4, right: 4, left: 0, bottom: 0 }} barCategoryGap="30%">
           <CartesianGrid strokeDasharray="3 3" stroke="#2a2a35" vertical={false} />
           <XAxis

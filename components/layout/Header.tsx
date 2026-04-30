@@ -14,9 +14,15 @@ export function Header({ onOpenSettings }: HeaderProps) {
   const { timeRange, setTimeRange, settings, setSettings } = useDashboard();
 
   return (
-    <header className="h-14 flex items-center gap-3 px-4 lg:px-6 border-b border-[#2a2a35] bg-[#131316] shrink-0">
+    <header
+      className="h-14 flex items-center gap-3 px-4 lg:px-6 border-b shrink-0"
+      style={{ background: "var(--bg-surface)", borderColor: "var(--c-border)" }}
+    >
       {/* Time range tabs */}
-      <div className="flex items-center gap-1 bg-[#0d0d0f] rounded-lg p-1 border border-[#2a2a35]">
+      <div
+        className="flex items-center gap-1 rounded-lg p-1 border"
+        style={{ background: "var(--bg-base)", borderColor: "var(--c-border)" }}
+      >
         {TIME_RANGES.map((r) => (
           <button
             key={r.value}
@@ -24,9 +30,10 @@ export function Header({ onOpenSettings }: HeaderProps) {
             className={cn(
               "px-2.5 py-1 text-xs font-medium rounded-md transition-colors",
               timeRange.value === r.value
-                ? "bg-[#1a1a1f] text-white"
-                : "text-[#9090a8] hover:text-[#e8e8f0]"
+                ? "bg-indigo-600 text-white"
+                : "hover:bg-[var(--bg-elevated)]"
             )}
+            style={{ color: timeRange.value === r.value ? undefined : "var(--text-2)" }}
           >
             {r.label}
           </button>
@@ -35,6 +42,13 @@ export function Header({ onOpenSettings }: HeaderProps) {
 
       <div className="flex-1" />
 
+      {/* Username greeting */}
+      {settings.userName && (
+        <span className="hidden md:block text-sm font-medium" style={{ color: "var(--text-2)" }}>
+          Hey, <span style={{ color: "var(--text-1)" }}>{settings.userName}</span>
+        </span>
+      )}
+
       {/* Privacy toggle */}
       <button
         onClick={() => setSettings((s) => ({ ...s, privacyMode: !s.privacyMode }))}
@@ -42,8 +56,9 @@ export function Header({ onOpenSettings }: HeaderProps) {
           "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors border",
           settings.privacyMode
             ? "bg-indigo-600/15 text-indigo-400 border-indigo-500/20"
-            : "text-[#9090a8] hover:text-[#e8e8f0] bg-[#0d0d0f] border-[#2a2a35]"
+            : "border"
         )}
+        style={settings.privacyMode ? undefined : { color: "var(--text-2)", borderColor: "var(--c-border)", background: "var(--bg-base)" }}
         title="Toggle privacy mode"
       >
         {settings.privacyMode ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
@@ -53,7 +68,8 @@ export function Header({ onOpenSettings }: HeaderProps) {
       {/* Import */}
       <Link
         href="/dashboard/import"
-        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium text-[#9090a8] hover:text-[#e8e8f0] bg-[#0d0d0f] border border-[#2a2a35] transition-colors"
+        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium border transition-colors"
+        style={{ color: "var(--text-2)", borderColor: "var(--c-border)", background: "var(--bg-base)" }}
       >
         <Upload className="w-3.5 h-3.5" />
         <span className="hidden sm:inline">Import</span>
@@ -62,7 +78,8 @@ export function Header({ onOpenSettings }: HeaderProps) {
       {/* Settings */}
       <button
         onClick={onOpenSettings}
-        className="w-8 h-8 flex items-center justify-center rounded-lg text-[#9090a8] hover:text-[#e8e8f0] hover:bg-[#1a1a1f] transition-colors"
+        className="w-8 h-8 flex items-center justify-center rounded-lg transition-colors"
+        style={{ color: "var(--text-2)" }}
       >
         <Settings className="w-4 h-4" />
       </button>

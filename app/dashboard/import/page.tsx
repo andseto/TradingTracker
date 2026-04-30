@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { Upload, FileText, CheckCircle, AlertCircle, X } from "lucide-react";
+import { Upload, FileText, CheckCircle, AlertCircle, X, RefreshCw, Info } from "lucide-react";
 import { useDashboard } from "@/context/DashboardContext";
 import { parseFidelityCSV } from "@/lib/csv-parser";
+import { MOCK_TRADES } from "@/lib/mock-data";
 import { Trade } from "@/types";
 import { cn } from "@/lib/utils";
 
@@ -15,20 +16,25 @@ interface ParseResult {
 }
 
 export default function ImportPage() {
-  const { addTrades } = useDashboard();
+  const { trades, setTrades, addTrades } = useDashboard();
   const [dragging, setDragging] = useState(false);
   const [results, setResults] = useState<ParseResult[]>([]);
   const [processing, setProcessing] = useState(false);
+  const [appendMode, setAppendMode] = useState(false);
+
+  const isUsingDemoData = trades === MOCK_TRADES || (
+    trades.length > 0 && trades[0].id.startsWith("T")
+  );
 
   const processFile = useCallback(async (file: File) => {
     const text = await file.text();
     try {
-      const trades = parseFidelityCSV(text);
-      if (trades.length === 0) {
+      const parsed = parseFidelityCSV(text);
+      if (parsed.length === 0) {
         return { trades: [], filename: file.name, status: "error" as const, message: "No valid trades found. Make sure this is a Fidelity account history CSV." };
       }
-      return { trades, filename: file.name, status: "success" as const, message: `Parsed ${trades.length} transactions` };
-    } catch (e) {
+      return { trades: parsed, filename: file.name, status: "success" as const, message: `Parsed ${parsed.length} transactions` };
+    } catch {
       return { trades: [], filename: file.name, status: "error" as const, message: "Failed to parse file" };
     }
   }, []);
@@ -39,11 +45,16 @@ export default function ImportPage() {
     const parsed = await Promise.all(arr.map(processFile));
     setResults((prev) => [...parsed, ...prev]);
 
-    for (const r of parsed) {
-      if (r.status === "success") addTrades(r.trades);
+    const successful = parsed.filter((r) => r.status === "success").flatMap((r) => r.trades);
+    if (successful.length > 0) {
+      if (appendMode) {
+        addTrades(successful);
+      } else {
+        setTrades(successful.sort((a, b) => a.date.localeCompare(b.date)));
+      }
     }
     setProcessing(false);
-  }, [processFile, addTrades]);
+  }, [processFile, appendMode, addTrades, setTrades]);
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
@@ -60,6 +71,53 @@ export default function ImportPage() {
           <span className="text-indigo-400">Accounts &amp; Trade → Account History</span>{" "}
           on Fidelity and download as CSV.
         </p>
+      </div>
+
+      {/* Demo data banner */}
+      {isUsingDemoData && (
+        <div className="mb-4 flex items-start gap-3 px-4 py-3 bg-amber-500/5 border border-amber-500/20 rounded-xl">
+          <Info className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-amber-300">You're viewing demo data</p>
+            <p className="text-xs text-amber-400/70 mt-0.5">
+              The dashboard is showing randomly generated trades. Import your real Fidelity CSV to see accurate information.
+            </p>
+          </div>
+          <button
+            onClick={() => setTrades([])}
+            className="shrink-0 text-xs text-amber-400/70 hover:text-amber-300 underline underline-offset-2"
+          >
+            Clear it
+          </button>
+        </div>
+      )}
+
+      {/* Replace / Append toggle */}
+      <div className="mb-4 flex items-center gap-3 p-3 bg-[#131316] border border-[#2a2a35] rounded-xl">
+        <span className="text-xs text-[#9090a8]">Import mode:</span>
+        <div className="flex rounded-lg bg-[#0d0d0f] p-0.5 border border-[#2a2a35]">
+          <button
+            onClick={() => setAppendMode(false)}
+            className={cn(
+              "px-3 py-1 text-xs font-medium rounded-md transition-colors",
+              !appendMode ? "bg-[#1a1a1f] text-white" : "text-[#9090a8] hover:text-[#e8e8f0]"
+            )}
+          >
+            Replace
+          </button>
+          <button
+            onClick={() => setAppendMode(true)}
+            className={cn(
+              "px-3 py-1 text-xs font-medium rounded-md transition-colors",
+              appendMode ? "bg-[#1a1a1f] text-white" : "text-[#9090a8] hover:text-[#e8e8f0]"
+            )}
+          >
+            Append
+          </button>
+        </div>
+        <span className="text-xs text-[#55556a]">
+          {appendMode ? "New CSV will be added to existing trades" : "New CSV will replace all current data"}
+        </span>
       </div>
 
       {/* Drop zone */}
@@ -101,6 +159,17 @@ export default function ImportPage() {
           Run Date, Action, Symbol, Security Description, Security Type, Quantity, Price ($), Commission ($), Amount ($)
         </code>
       </div>
+
+      {/* Restore demo data */}
+      {!isUsingDemoData && (
+        <button
+          onClick={() => { setTrades(MOCK_TRADES); setResults([]); }}
+          className="mt-4 flex items-center gap-2 text-xs text-[#55556a] hover:text-[#9090a8] transition-colors"
+        >
+          <RefreshCw className="w-3.5 h-3.5" />
+          Restore demo data
+        </button>
+      )}
 
       {/* Results */}
       {results.length > 0 && (

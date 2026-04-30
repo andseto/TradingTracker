@@ -21,9 +21,13 @@ export function matchTrades(trades: Trade[]): ClosedPosition[] {
       let remaining = trade.quantity;
       const queue = positions[trade.symbol] ?? [];
 
-      while (remaining > 0 && queue.length > 0) {
+      while (remaining > 1e-9 && queue.length > 0) {
         const lot = queue[0];
         const filled = Math.min(remaining, lot.qty);
+
+        // Skip ghost lots from floating point residuals
+        if (filled < 1e-9) { queue.shift(); break; }
+
         const pnl = (trade.price - lot.price) * filled;
         const pnlPct = ((trade.price - lot.price) / lot.price) * 100;
 
@@ -32,7 +36,7 @@ export function matchTrades(trades: Trade[]): ClosedPosition[] {
           symbol: trade.symbol,
           openDate: lot.date,
           closeDate: trade.date,
-          quantity: filled,
+          quantity: parseFloat(filled.toFixed(6)),
           entryPrice: lot.price,
           exitPrice: trade.price,
           pnl: parseFloat(pnl.toFixed(2)),
@@ -42,7 +46,7 @@ export function matchTrades(trades: Trade[]): ClosedPosition[] {
 
         lot.qty -= filled;
         remaining -= filled;
-        if (lot.qty === 0) queue.shift();
+        if (lot.qty < 1e-9) queue.shift();
       }
 
       if (!positions[trade.symbol]) positions[trade.symbol] = [];
@@ -116,11 +120,14 @@ export function calcSymbolPnL(positions: ClosedPosition[]): SymbolPnL[] {
 }
 
 export function calcEquityCurve(daily: DailyPnL[]): EquityPoint[] {
+  if (daily.length === 0) return [];
   let cum = 0;
-  return daily.map((d) => {
+  const points: EquityPoint[] = [{ date: daily[0].date, cumPnl: 0, dailyPnl: 0 }];
+  for (const d of daily) {
     cum += d.pnl;
-    return { date: d.date, cumPnl: parseFloat(cum.toFixed(2)), dailyPnl: d.pnl };
-  });
+    points.push({ date: d.date, cumPnl: parseFloat(cum.toFixed(2)), dailyPnl: d.pnl });
+  }
+  return points;
 }
 
 export function calcStats(positions: ClosedPosition[], daily: DailyPnL[]): Stats {

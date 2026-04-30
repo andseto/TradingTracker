@@ -9,34 +9,35 @@ interface StatCardProps {
   subValue?: string;
   trend?: "up" | "down" | "neutral";
   icon?: LucideIcon;
-  accent?: string;
   className?: string;
 }
 
 export function StatCard({ label, value, subValue, trend, icon: Icon, className }: StatCardProps) {
   const trendColor =
-    trend === "up" ? "text-[#22c55e]" :
-    trend === "down" ? "text-[#ef4444]" :
-    "text-[#9090a8]";
+    trend === "up" ? "#22c55e" :
+    trend === "down" ? "#ef4444" :
+    undefined;
 
   return (
-    <div className={cn(
-      "bg-[#131316] border border-[#2a2a35] rounded-xl p-4 flex flex-col gap-2 hover:border-[#3a3a48] transition-colors",
-      className
-    )}>
+    <div
+      className={cn("rounded-xl p-4 flex flex-col gap-2 border transition-colors", className)}
+      style={{ background: "var(--bg-card)", borderColor: "var(--c-border)" }}
+    >
       <div className="flex items-center justify-between">
-        <span className="text-xs font-medium text-[#9090a8] uppercase tracking-wide">{label}</span>
+        <span className="text-xs font-medium uppercase tracking-wide" style={{ color: "var(--text-2)" }}>
+          {label}
+        </span>
         {Icon && (
-          <div className="w-6 h-6 rounded-md bg-[#1a1a1f] flex items-center justify-center">
-            <Icon className="w-3.5 h-3.5 text-[#55556a]" />
+          <div className="w-6 h-6 rounded-md flex items-center justify-center" style={{ background: "var(--bg-elevated)" }}>
+            <Icon className="w-3.5 h-3.5" style={{ color: "var(--text-3)" }} />
           </div>
         )}
       </div>
-      <div className={cn("font-mono font-semibold text-xl tracking-tight", trendColor)}>
+      <div className="font-mono font-semibold text-xl tracking-tight" style={{ color: trendColor ?? "var(--text-1)" }}>
         {value}
       </div>
       {subValue && (
-        <div className="text-xs text-[#55556a] font-mono">{subValue}</div>
+        <div className="text-xs font-mono" style={{ color: "var(--text-3)" }}>{subValue}</div>
       )}
     </div>
   );

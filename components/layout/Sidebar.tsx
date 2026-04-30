@@ -4,13 +4,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   TrendingUp, LayoutDashboard, Upload, ChevronLeft,
-  ChevronRight, BarChart2, Calendar
+  ChevronRight, BarChart2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-  { href: "/dashboard/calendar", icon: Calendar, label: "Calendar" },
   { href: "/dashboard/charts", icon: BarChart2, label: "Charts" },
   { href: "/dashboard/import", icon: Upload, label: "Import CSV" },
 ];
@@ -25,13 +24,11 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
 
   return (
     <aside
-      className={cn(
-        "flex flex-col bg-[#131316] border-r border-[#2a2a35] transition-all duration-200 shrink-0",
-        collapsed ? "w-14" : "w-52"
-      )}
+      className={cn("flex flex-col border-r transition-all duration-200 shrink-0", collapsed ? "w-14" : "w-52")}
+      style={{ background: "var(--bg-surface)", borderColor: "var(--c-border)" }}
     >
       {/* Logo */}
-      <div className={cn("flex items-center h-14 px-3 border-b border-[#2a2a35] shrink-0", collapsed ? "justify-center" : "gap-2.5 px-4")}>
+      <div className={cn("flex items-center h-14 px-3 border-b shrink-0", collapsed ? "justify-center" : "gap-2.5 px-4")} style={{ borderColor: "var(--c-border)" }}>
         <div className="w-7 h-7 rounded-lg bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center shrink-0">
           <TrendingUp className="w-3.5 h-3.5 text-indigo-400" />
         </div>
@@ -65,7 +62,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
       </nav>
 
       {/* Collapse toggle */}
-      <div className="p-2 border-t border-[#2a2a35]">
+      <div className="p-2 border-t" style={{ borderColor: "var(--c-border)" }}>
         <button
           onClick={onToggle}
           className={cn(

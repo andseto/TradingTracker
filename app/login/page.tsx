@@ -171,9 +171,6 @@ export default function LoginPage() {
           </button>
         </div>
 
-        <p className="text-center text-xs text-[#55556a] mt-4">
-          Add your Supabase credentials in <code className="text-[#9090a8]">.env.local</code> to enable auth
-        </p>
       </div>
     </div>
   );
