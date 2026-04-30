@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { X, Sun, Moon, Trash2, User, AlertTriangle, AlertCircle } from "lucide-react";
+import { X, Sun, Moon, Trash2, User, AlertTriangle, AlertCircle, LogOut } from "lucide-react";
 import { useDashboard } from "@/context/DashboardContext";
+import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 interface SettingsModalProps {
@@ -11,9 +12,17 @@ interface SettingsModalProps {
 }
 
 export function SettingsModal({ open, onClose }: SettingsModalProps) {
-  const { settings, setSettings, setTrades, syncError } = useDashboard();
+  const { settings, setSettings, setTrades, syncError, userId } = useDashboard();
   const [nameInput, setNameInput] = useState(settings.userName);
   const [confirmClear, setConfirmClear] = useState(false);
+  const router = useRouter();
+
+  async function handleLogout() {
+    const { createClient } = await import("@/lib/supabase/client");
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push("/login");
+  }
 
   if (!open) return null;
 
@@ -132,6 +141,20 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
               <span className={cn("absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform", settings.privacyMode ? "translate-x-5" : "translate-x-0.5")} />
             </button>
           </div>
+
+          {/* Logout */}
+          {userId && (
+            <div className="pt-2 border-t" style={{ borderColor: "var(--c-border)" }}>
+              <button
+                onClick={handleLogout}
+                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium border transition-colors"
+                style={{ color: "var(--text-2)", borderColor: "var(--c-border)", background: "var(--bg-base)" }}
+              >
+                <LogOut className="w-4 h-4" />
+                Sign Out
+              </button>
+            </div>
+          )}
 
           {/* Clear data */}
           <div className="pt-2 border-t" style={{ borderColor: "var(--c-border)" }}>
