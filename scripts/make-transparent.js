@@ -8,9 +8,14 @@ for (let y = 0; y < png.height; y++) {
   for (let x = 0; x < png.width; x++) {
     const i = (png.width * y + x) * 4;
     const r = png.data[i], g = png.data[i + 1], b = png.data[i + 2];
-    // Make near-white pixels transparent
     if (r > 200 && g > 200 && b > 200) {
+      // White background → transparent
       png.data[i + 3] = 0;
+    } else {
+      // Dark pixels → white
+      png.data[i] = 255;
+      png.data[i + 1] = 255;
+      png.data[i + 2] = 255;
     }
   }
 }
