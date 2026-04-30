@@ -4,7 +4,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "TradeForge — Forge your Edge",
   description: "Professional trading journal & analytics",
-  icons: { icon: "/favicon.svg" },
+  icons: { icon: "/anvil.png" },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
