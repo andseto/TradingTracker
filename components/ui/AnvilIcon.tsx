@@ -8,10 +8,6 @@ export function AnvilIcon({ className }: AnvilIconProps) {
       src="/anvil.png"
       alt="anvil"
       className={className}
-      style={{
-        filter: "invert(1)",
-        mixBlendMode: "screen",
-      }}
     />
   );
 }
