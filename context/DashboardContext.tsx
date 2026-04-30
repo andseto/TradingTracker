@@ -180,6 +180,8 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
         username: next.userName,
         theme: next.theme,
         privacy_mode: next.privacyMode,
+      }).then(({ error: profErr }) => {
+        if (profErr) setSyncError(`Settings save failed: ${profErr.message} (code: ${profErr.code})`);
       });
     }
   }, []);

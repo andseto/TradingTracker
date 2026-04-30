@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { X, Sun, Moon, Trash2, User, AlertTriangle } from "lucide-react";
+import { X, Sun, Moon, Trash2, User, AlertTriangle, AlertCircle } from "lucide-react";
 import { useDashboard } from "@/context/DashboardContext";
 import { cn } from "@/lib/utils";
 
@@ -11,7 +11,7 @@ interface SettingsModalProps {
 }
 
 export function SettingsModal({ open, onClose }: SettingsModalProps) {
-  const { settings, setSettings, setTrades } = useDashboard();
+  const { settings, setSettings, setTrades, syncError } = useDashboard();
   const [nameInput, setNameInput] = useState(settings.userName);
   const [confirmClear, setConfirmClear] = useState(false);
 
@@ -47,6 +47,14 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
         </div>
 
         <div className="p-5 space-y-6">
+          {/* Sync error */}
+          {syncError && syncError.includes("Settings") && (
+            <div className="flex items-start gap-2 px-3 py-2.5 bg-red-500/5 border border-red-500/20 rounded-lg">
+              <AlertCircle className="w-3.5 h-3.5 text-red-400 shrink-0 mt-0.5" />
+              <p className="text-xs text-red-300 font-mono break-all">{syncError}</p>
+            </div>
+          )}
+
           {/* Name */}
           <div>
             <label className="block text-xs font-medium uppercase tracking-wide mb-2" style={{ color: "var(--text-2)" }}>
