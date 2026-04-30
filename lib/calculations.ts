@@ -4,52 +4,80 @@ import {
 } from "@/types";
 import { format, parseISO } from "date-fns";
 
-// FIFO matching: match sells against buys per symbol
+// FIFO matching with short support.
+// Fidelity CSVs are newest-first, so intraday round-trips often appear as
+// SELL then BUY. Without short support those sells were silently dropped,
+// causing the next batch of buys to match against wrong (lower-price) sells
+// and producing wildly inflated losses.
 export function matchTrades(trades: Trade[]): ClosedPosition[] {
-  const positions: Record<string, { date: string; qty: number; price: number }[]> = {};
+  const longs:  Record<string, { date: string; qty: number; price: number }[]> = {};
+  const shorts: Record<string, { date: string; qty: number; price: number }[]> = {};
   const closed: ClosedPosition[] = [];
   let idCounter = 0;
 
   const sorted = [...trades].sort((a, b) => a.date.localeCompare(b.date));
 
   for (const trade of sorted) {
+    if (!longs[trade.symbol])  longs[trade.symbol]  = [];
+    if (!shorts[trade.symbol]) shorts[trade.symbol] = [];
+
+    const longQ  = longs[trade.symbol];
+    const shortQ = shorts[trade.symbol];
+
     if (trade.action === "BUY") {
-      if (!positions[trade.symbol]) positions[trade.symbol] = [];
-      positions[trade.symbol].push({ date: trade.date, qty: trade.quantity, price: trade.price });
-    } else {
-      // SELL — consume from front (FIFO)
+      // 1. Cover any open shorts first (FIFO)
       let remaining = trade.quantity;
-      const queue = positions[trade.symbol] ?? [];
-
-      while (remaining > 1e-9 && queue.length > 0) {
-        const lot = queue[0];
+      while (remaining > 1e-9 && shortQ.length > 0) {
+        const lot    = shortQ[0];
         const filled = Math.min(remaining, lot.qty);
+        if (filled < 1e-9) { shortQ.shift(); break; }
 
-        // Skip ghost lots from floating point residuals
-        if (filled < 1e-9) { queue.shift(); break; }
-
-        const pnl = (trade.price - lot.price) * filled;
-        const pnlPct = ((trade.price - lot.price) / lot.price) * 100;
-
+        const pnl    = (lot.price - trade.price) * filled;
+        const pnlPct = ((lot.price - trade.price) / lot.price) * 100;
         closed.push({
-          id: `P${idCounter++}`,
-          symbol: trade.symbol,
-          openDate: lot.date,
-          closeDate: trade.date,
+          id: `P${idCounter++}`, symbol: trade.symbol,
+          openDate: lot.date, closeDate: trade.date,
           quantity: parseFloat(filled.toFixed(6)),
-          entryPrice: lot.price,
-          exitPrice: trade.price,
+          entryPrice: lot.price, exitPrice: trade.price,
           pnl: parseFloat(pnl.toFixed(2)),
           pnlPct: parseFloat(pnlPct.toFixed(2)),
           isWin: pnl > 0,
         });
-
-        lot.qty -= filled;
+        lot.qty   -= filled;
         remaining -= filled;
-        if (lot.qty < 1e-9) queue.shift();
+        if (lot.qty < 1e-9) shortQ.shift();
       }
+      // 2. Remainder opens a new long lot
+      if (remaining > 1e-9)
+        longQ.push({ date: trade.date, qty: remaining, price: trade.price });
 
-      if (!positions[trade.symbol]) positions[trade.symbol] = [];
+    } else {
+      // SELL
+      // 1. Close open longs first (FIFO)
+      let remaining = trade.quantity;
+      while (remaining > 1e-9 && longQ.length > 0) {
+        const lot    = longQ[0];
+        const filled = Math.min(remaining, lot.qty);
+        if (filled < 1e-9) { longQ.shift(); break; }
+
+        const pnl    = (trade.price - lot.price) * filled;
+        const pnlPct = ((trade.price - lot.price) / lot.price) * 100;
+        closed.push({
+          id: `P${idCounter++}`, symbol: trade.symbol,
+          openDate: lot.date, closeDate: trade.date,
+          quantity: parseFloat(filled.toFixed(6)),
+          entryPrice: lot.price, exitPrice: trade.price,
+          pnl: parseFloat(pnl.toFixed(2)),
+          pnlPct: parseFloat(pnlPct.toFixed(2)),
+          isWin: pnl > 0,
+        });
+        lot.qty   -= filled;
+        remaining -= filled;
+        if (lot.qty < 1e-9) longQ.shift();
+      }
+      // 2. Remainder opens a new short lot
+      if (remaining > 1e-9)
+        shortQ.push({ date: trade.date, qty: remaining, price: trade.price });
     }
   }
 
