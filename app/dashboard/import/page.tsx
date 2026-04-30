@@ -16,7 +16,7 @@ interface ParseResult {
 }
 
 export default function ImportPage() {
-  const { trades, setTrades, addTrades, userId } = useDashboard();
+  const { trades, setTrades, addTrades, userId, syncError } = useDashboard();
   const [dragging, setDragging] = useState(false);
   const [results, setResults] = useState<ParseResult[]>([]);
   const [processing, setProcessing] = useState(false);
@@ -72,6 +72,17 @@ export default function ImportPage() {
           on Fidelity and download as CSV.
         </p>
       </div>
+
+      {/* Supabase sync error */}
+      {syncError && (
+        <div className="mb-4 flex items-start gap-3 px-4 py-3 bg-red-500/5 border border-red-500/20 rounded-xl">
+          <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-red-300">Supabase save failed</p>
+            <p className="text-xs text-red-400/70 mt-0.5 font-mono break-all">{syncError}</p>
+          </div>
+        </div>
+      )}
 
       {/* Not logged in warning */}
       {!userId && (

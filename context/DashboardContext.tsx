@@ -28,6 +28,7 @@ interface DashboardContextValue {
   setSettings: React.Dispatch<React.SetStateAction<Settings>>;
   loading: boolean;
   userId: string | null;
+  syncError: string | null;
   positions: ClosedPosition[];
   daily: DailyPnL[];
   monthly: MonthlyPnL[];
@@ -72,6 +73,7 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
   const [settings, setSettingsState] = useState<Settings>({ theme: "dark", privacyMode: false, userName: "" });
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
+  const [syncError, setSyncError] = useState<string | null>(null);
 
   const userIdRef = useRef<string | null>(null);
   const settingsRef = useRef<Settings>(settings);
@@ -136,25 +138,31 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
   // Replace all trades and sync to Supabase
   const setTrades = useCallback((newTrades: Trade[]) => {
     setTradesState(newTrades);
+    setSyncError(null);
     const uid = userIdRef.current;
     if (!uid) return;
     const supabase = createClient();
-    supabase.from("trades").delete().eq("user_id", uid).then(() => {
-      if (newTrades.length > 0) {
-        supabase.from("trades").insert(newTrades.map((t) => tradeToRow(t, uid)));
-      }
+    supabase.from("trades").delete().eq("user_id", uid).then(({ error: delErr }) => {
+      if (delErr) { setSyncError(`Delete failed: ${delErr.message} (code: ${delErr.code})`); return; }
+      if (newTrades.length === 0) return;
+      supabase.from("trades").insert(newTrades.map((t) => tradeToRow(t, uid))).then(({ error: insErr }) => {
+        if (insErr) setSyncError(`Insert failed: ${insErr.message} (code: ${insErr.code})`);
+      });
     });
   }, []);
 
   // Append new trades (dedup) and sync to Supabase
   const addTrades = useCallback((incoming: Trade[]) => {
+    setSyncError(null);
     setTradesState((prev) => {
       const existingIds = new Set(prev.map((t) => t.id));
       const fresh = incoming.filter((t) => !existingIds.has(t.id));
       const uid = userIdRef.current;
       if (uid && fresh.length > 0) {
         const supabase = createClient();
-        supabase.from("trades").upsert(fresh.map((t) => tradeToRow(t, uid)), { onConflict: "id" });
+        supabase.from("trades").upsert(fresh.map((t) => tradeToRow(t, uid)), { onConflict: "id" }).then(({ error: upsErr }) => {
+          if (upsErr) setSyncError(`Upsert failed: ${upsErr.message} (code: ${upsErr.code})`);
+        });
       }
       return [...prev, ...fresh].sort((a, b) => a.date.localeCompare(b.date));
     });
@@ -203,7 +211,7 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
       trades, setTrades, addTrades,
       timeRange, setTimeRange,
       settings, setSettings,
-      loading, userId,
+      loading, userId, syncError,
       positions: filteredPositions,
       daily, monthly, symbols, equity, stats, dowPnl,
     }}>
