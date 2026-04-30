@@ -50,7 +50,6 @@ export function parseFidelityCSV(csvText: string): Trade[] {
   });
 
   const trades: Trade[] = [];
-  let idCounter = 0;
 
   for (const row of result.data) {
     const action = parseAction(row.Action ?? "");
@@ -68,7 +67,7 @@ export function parseFidelityCSV(csvText: string): Trade[] {
     if (!qty || !price) continue;
 
     trades.push({
-      id: `CSV-${idCounter++}`,
+      id: crypto.randomUUID(),
       date,
       symbol,
       action,

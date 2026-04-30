@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { TrendingUp, Eye, EyeOff, AlertCircle } from "lucide-react";
+import { Eye, EyeOff, AlertCircle } from "lucide-react";
+import { AnvilIcon } from "@/components/ui/AnvilIcon";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -76,11 +77,11 @@ export default function LoginPage() {
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-3 mb-3">
             <div className="w-10 h-10 rounded-xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center">
-              <TrendingUp className="w-5 h-5 text-indigo-400" />
+              <AnvilIcon className="w-6 h-6 text-indigo-400" />
             </div>
-            <span className="text-2xl font-bold tracking-tight text-white">TradeTrack</span>
+            <span className="text-2xl font-bold tracking-tight text-white">TradeForge</span>
           </div>
-          <p className="text-[#9090a8] text-sm">Professional trading journal &amp; analytics</p>
+          <p className="text-[#9090a8] text-sm">Forge your edge</p>
         </div>
 
         {/* Card */}

@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "TradeTrack — Portfolio Dashboard",
-  description: "Dark theme trading portfolio tracker",
+  title: "TradeForge — Forge your Edge",
+  description: "Professional trading journal & analytics",
+  icons: { icon: "/favicon.svg" },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

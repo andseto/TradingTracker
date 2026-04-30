@@ -3,10 +3,11 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  TrendingUp, LayoutDashboard, Upload, ChevronLeft,
+  LayoutDashboard, Upload, ChevronLeft,
   ChevronRight, BarChart2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { AnvilIcon } from "@/components/ui/AnvilIcon";
 
 const navItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
@@ -30,10 +31,10 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
       {/* Logo */}
       <div className={cn("flex items-center h-14 px-3 border-b shrink-0", collapsed ? "justify-center" : "gap-2.5 px-4")} style={{ borderColor: "var(--c-border)" }}>
         <div className="w-7 h-7 rounded-lg bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center shrink-0">
-          <TrendingUp className="w-3.5 h-3.5 text-indigo-400" />
+          <AnvilIcon className="w-4 h-4 text-indigo-400" />
         </div>
         {!collapsed && (
-          <span className="font-bold text-sm tracking-tight text-white truncate">TradeTrack</span>
+          <span className="font-bold text-sm tracking-tight text-white truncate">TradeForge</span>
         )}
       </div>
 
