@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import {
   Target, CheckCircle2, XCircle, Edit2, Save, X,
-  TrendingUp, TrendingDown, Clock, ChevronRight,
+  Clock, ChevronRight, Pin,
 } from "lucide-react";
 import { useDashboard } from "@/context/DashboardContext";
 import { calcAllGoalMonths, GoalMonth } from "@/lib/calculations";
@@ -62,6 +62,30 @@ export function GoalsContent() {
   const [formYear, setFormYear] = useState(defaultStart.year);
   const [formBalance, setFormBalance] = useState(goal ? String(goal.startBalance) : "");
   const [formPct, setFormPct] = useState(goal ? String(goal.targetPct) : "5");
+
+  // Per-month balance override editing
+  const [editingMonth, setEditingMonth] = useState<string | null>(null);
+  const [editingBalanceInput, setEditingBalanceInput] = useState("");
+
+  function startEditMonthBalance(month: string, currentStart: number) {
+    setEditingMonth(month);
+    setEditingBalanceInput(String(currentStart));
+  }
+
+  function saveMonthBalance() {
+    if (!goal || !editingMonth) return;
+    const val = parseFloat(editingBalanceInput.replace(/,/g, ""));
+    if (isNaN(val) || val <= 0) return;
+    setGoal({ ...goal, monthBalances: { ...goal.monthBalances, [editingMonth]: val } });
+    setEditingMonth(null);
+  }
+
+  function clearMonthBalance(month: string) {
+    if (!goal) return;
+    const next = { ...goal.monthBalances };
+    delete next[month];
+    setGoal({ ...goal, monthBalances: next });
+  }
 
   const allMonths = useMemo(() => {
     if (!isSetup) return [];
@@ -263,19 +287,33 @@ export function GoalsContent() {
 
       {/* ── Current month card ── */}
       {isSetup && !editing && current && (
-        <CurrentMonthCard data={current} privacy={privacy} targetPct={goal!.targetPct} />
+        <CurrentMonthCard
+          data={current}
+          privacy={privacy}
+          targetPct={goal!.targetPct}
+          editingMonth={editingMonth}
+          editingBalanceInput={editingBalanceInput}
+          setEditingBalanceInput={setEditingBalanceInput}
+          onStartEdit={startEditMonthBalance}
+          onSaveEdit={saveMonthBalance}
+          onCancelEdit={() => setEditingMonth(null)}
+          onClearEdit={clearMonthBalance}
+        />
       )}
 
       {/* ── Past months table ── */}
       {isSetup && !editing && pastMonths.length > 0 && (
         <section>
-          <h2 className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: "var(--text-3)" }}>
-            Past Months
-          </h2>
+          <div className="flex items-center gap-2 mb-3">
+            <h2 className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-3)" }}>
+              Past Months
+            </h2>
+            <span className="text-xs" style={{ color: "var(--text-3)" }}>— click <Pin className="inline w-3 h-3 mx-0.5" /> to correct a month's starting balance</span>
+          </div>
           <div className="rounded-xl border overflow-hidden" style={{ borderColor: "var(--c-border)" }}>
             {/* Table header */}
             <div
-              className="hidden sm:grid grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr_80px] gap-4 px-4 py-2.5 text-xs font-medium uppercase tracking-wider border-b"
+              className="hidden sm:grid grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr_90px] gap-4 px-4 py-2.5 text-xs font-medium uppercase tracking-wider border-b"
               style={{ background: "var(--bg-base)", borderColor: "var(--c-border)", color: "var(--text-3)" }}
             >
               <span>Month</span>
@@ -287,7 +325,18 @@ export function GoalsContent() {
               <span className="text-right">Result</span>
             </div>
             {pastMonths.map((m) => (
-              <PastMonthRow key={m.month} data={m} privacy={privacy} />
+              <PastMonthRow
+                key={m.month}
+                data={m}
+                privacy={privacy}
+                editingMonth={editingMonth}
+                editingBalanceInput={editingBalanceInput}
+                setEditingBalanceInput={setEditingBalanceInput}
+                onStartEdit={startEditMonthBalance}
+                onSaveEdit={saveMonthBalance}
+                onCancelEdit={() => setEditingMonth(null)}
+                onClearEdit={clearMonthBalance}
+              />
             ))}
           </div>
         </section>
@@ -327,10 +376,48 @@ export function GoalsContent() {
 
 // ── Current month card ────────────────────────────────────────────────────────
 
-function CurrentMonthCard({ data, privacy, targetPct }: { data: GoalMonth; privacy: boolean; targetPct: number }) {
+interface EditProps {
+  editingMonth: string | null;
+  editingBalanceInput: string;
+  setEditingBalanceInput: (v: string) => void;
+  onStartEdit: (month: string, current: number) => void;
+  onSaveEdit: () => void;
+  onCancelEdit: () => void;
+  onClearEdit: (month: string) => void;
+}
+
+function InlineBalanceEdit({ month, onSave, onCancel, value, onChange }: {
+  month: string; onSave: () => void; onCancel: () => void; value: string; onChange: (v: string) => void;
+}) {
+  return (
+    <div className="flex items-center gap-1.5 mt-1">
+      <div className="relative">
+        <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs" style={{ color: "var(--text-3)" }}>$</span>
+        <input
+          autoFocus
+          type="number"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          onKeyDown={(e) => { if (e.key === "Enter") onSave(); if (e.key === "Escape") onCancel(); }}
+          className="w-32 pl-5 pr-2 py-1 text-xs rounded-md border focus:outline-none focus:ring-1 focus:ring-indigo-500/40"
+          style={{ background: "var(--bg-base)", borderColor: "var(--c-border)", color: "var(--text-1)" }}
+        />
+      </div>
+      <button onClick={onSave} className="p-1 rounded text-emerald-400 hover:bg-emerald-500/10 transition-colors">
+        <Save className="w-3.5 h-3.5" />
+      </button>
+      <button onClick={onCancel} className="p-1 rounded hover:bg-[#1a1a1f] transition-colors" style={{ color: "var(--text-3)" }}>
+        <X className="w-3.5 h-3.5" />
+      </button>
+    </div>
+  );
+}
+
+function CurrentMonthCard({ data, privacy, targetPct, editingMonth, editingBalanceInput, setEditingBalanceInput, onStartEdit, onSaveEdit, onCancelEdit, onClearEdit }: { data: GoalMonth; privacy: boolean; targetPct: number } & EditProps) {
   const progressPct = Math.round(data.progress * 100);
   const pnl = data.monthPnl ?? 0;
   const needed = data.goalAmount - data.endBalance;
+  const isEditingThis = editingMonth === data.month;
 
   return (
     <div className="rounded-xl border p-5 space-y-4" style={{ background: "var(--bg-surface)", borderColor: "var(--c-border)" }}>
@@ -344,14 +431,31 @@ function CurrentMonthCard({ data, privacy, targetPct }: { data: GoalMonth; priva
 
       {/* 4-stat row */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <Stat label="Month Start" value={fmtc(data.startBalance, privacy)} />
+        {/* Month start — editable */}
+        <div className="rounded-lg p-3" style={{ background: "var(--bg-base)" }}>
+          <div className="flex items-center gap-1 mb-0.5">
+            <p className="text-xs" style={{ color: "var(--text-3)" }}>Month Start</p>
+            {data.isOverride && (
+              <button onClick={() => onClearEdit(data.month)} title="Remove override" className="text-indigo-400/60 hover:text-indigo-400">
+                <Pin className="w-2.5 h-2.5" />
+              </button>
+            )}
+            {!isEditingThis && (
+              <button onClick={() => onStartEdit(data.month, data.startBalance)} title="Correct this balance" className="hover:opacity-80" style={{ color: "var(--text-3)" }}>
+                <Edit2 className="w-2.5 h-2.5" />
+              </button>
+            )}
+          </div>
+          {isEditingThis ? (
+            <InlineBalanceEdit month={data.month} value={editingBalanceInput} onChange={setEditingBalanceInput} onSave={onSaveEdit} onCancel={onCancelEdit} />
+          ) : (
+            <p className="text-sm font-semibold" style={{ color: "var(--text-1)" }}>{fmtc(data.startBalance, privacy)}</p>
+          )}
+        </div>
+
         <Stat label="Current Balance" value={fmtc(data.endBalance, privacy)} highlight />
         <Stat label={`Goal (+${targetPct}%)`} value={fmtc(data.goalAmount, privacy)} accent="indigo" />
-        <Stat
-          label="This Month P&L"
-          value={fmtPnl(pnl, privacy)}
-          accent={pnl >= 0 ? "green" : "red"}
-        />
+        <Stat label="This Month P&L" value={fmtPnl(pnl, privacy)} accent={pnl >= 0 ? "green" : "red"} />
       </div>
 
       {/* Progress bar */}
@@ -390,11 +494,7 @@ function CurrentMonthCard({ data, privacy, targetPct }: { data: GoalMonth; priva
             ? `Need ${fmtc(needed, privacy)} more to hit +${targetPct}%`
             : "On track"}
         </span>
-        <span>
-          {data.startBalance > 0 && (
-            <>Target: {fmtc(data.goalAmount, privacy)}</>
-          )}
-        </span>
+        <span>{data.startBalance > 0 && <>Target: {fmtc(data.goalAmount, privacy)}</>}</span>
       </div>
     </div>
   );
@@ -402,13 +502,14 @@ function CurrentMonthCard({ data, privacy, targetPct }: { data: GoalMonth; priva
 
 // ── Past month table row ──────────────────────────────────────────────────────
 
-function PastMonthRow({ data, privacy }: { data: GoalMonth; privacy: boolean }) {
+function PastMonthRow({ data, privacy, editingMonth, editingBalanceInput, setEditingBalanceInput, onStartEdit, onSaveEdit, onCancelEdit, onClearEdit }: { data: GoalMonth; privacy: boolean } & EditProps) {
   const pnl = data.monthPnl ?? 0;
   const achieved = data.isAchieved ?? false;
+  const isEditingThis = editingMonth === data.month;
 
   return (
     <div
-      className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr_80px] gap-4 px-4 py-3 border-b last:border-b-0 items-center"
+      className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr_90px] gap-4 px-4 py-3 border-b last:border-b-0 items-start sm:items-center"
       style={{ background: "var(--bg-surface)", borderColor: "var(--c-border)" }}
     >
       {/* Month */}
@@ -419,10 +520,25 @@ function PastMonthRow({ data, privacy }: { data: GoalMonth; privacy: boolean }) 
         <span className="text-sm font-medium" style={{ color: "var(--text-1)" }}>{data.label}</span>
       </div>
 
-      {/* Start */}
+      {/* Start — with pin edit */}
       <div>
         <p className="sm:hidden text-xs mb-0.5" style={{ color: "var(--text-3)" }}>Start</p>
-        <span className="text-sm" style={{ color: "var(--text-2)" }}>{fmt(data.startBalance, privacy)}</span>
+        <div className="flex items-center gap-1">
+          <span className="text-sm" style={{ color: "var(--text-2)" }}>{fmt(data.startBalance, privacy)}</span>
+          {data.isOverride && (
+            <button onClick={() => onClearEdit(data.month)} title="Remove override" className="text-indigo-400/60 hover:text-indigo-400 shrink-0">
+              <Pin className="w-2.5 h-2.5" />
+            </button>
+          )}
+          {!isEditingThis && (
+            <button onClick={() => onStartEdit(data.month, data.startBalance)} title="Set actual starting balance" className="shrink-0 hover:opacity-80 transition-opacity" style={{ color: "var(--text-3)" }}>
+              <Edit2 className="w-2.5 h-2.5" />
+            </button>
+          )}
+        </div>
+        {isEditingThis && (
+          <InlineBalanceEdit month={data.month} value={editingBalanceInput} onChange={setEditingBalanceInput} onSave={onSaveEdit} onCancel={onCancelEdit} />
+        )}
       </div>
 
       {/* End */}

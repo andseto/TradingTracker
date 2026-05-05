@@ -78,9 +78,10 @@ export interface Settings {
 }
 
 export interface Goal {
-  targetPct: number;    // monthly % growth target, e.g. 5 for 5%
-  startMonth: string;   // YYYY-MM — first month to track, e.g. "2026-04"
+  targetPct: number;
+  startMonth: string;   // YYYY-MM
   startBalance: number; // account balance at the start of startMonth
+  monthBalances?: Record<string, number>; // YYYY-MM → actual starting balance override
 }
 
 export interface TimeRange {

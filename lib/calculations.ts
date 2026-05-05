@@ -225,13 +225,14 @@ export interface GoalMonth {
   label: string;
   status: GoalMonthStatus;
   startBalance: number;
-  endBalance: number;      // actual for past/current, projected (= goal) for future
+  endBalance: number;
   goalAmount: number;
-  monthPnl: number | null; // null for future
-  gainPct: number | null;  // null for future
-  progress: number;        // 0–1 clamped for bar; null for future
+  monthPnl: number | null;
+  gainPct: number | null;
+  progress: number;
   isAchieved: boolean | null;
-  daysRemaining: number;   // only meaningful when status === "current"
+  daysRemaining: number;
+  isOverride: boolean; // true when startBalance was manually pinned
 }
 
 function shiftMonth(month: string, by: number): string {
@@ -268,7 +269,10 @@ export function calcAllGoalMonths(allDaily: DailyPnL[], goal: Goal, futureCount 
     const status: GoalMonthStatus =
       month < currentMonth ? "past" : month === currentMonth ? "current" : "future";
 
-    const startBalance = parseFloat(runningBalance.toFixed(2));
+    // Per-month override lets the user pin their actual account balance for any month,
+    // correcting drift caused by open positions, dividends, deposits, etc.
+    const override = goal.monthBalances?.[month];
+    const startBalance = parseFloat((override !== undefined ? override : runningBalance).toFixed(2));
     const goalAmount = parseFloat((startBalance * (1 + goal.targetPct / 100)).toFixed(2));
 
     let monthPnl: number | null = null;
@@ -327,6 +331,7 @@ export function calcAllGoalMonths(allDaily: DailyPnL[], goal: Goal, futureCount 
       progress: parseFloat(progress.toFixed(4)),
       isAchieved,
       daysRemaining,
+      isOverride: override !== undefined,
     };
   });
 }
