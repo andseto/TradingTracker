@@ -27,7 +27,10 @@ export interface DailyPnL {
   pnl: number;
   trades: number;
   isWin: boolean;
+  isBreakEven?: boolean;
 }
+
+export type DayTag = 'win' | 'loss' | 'breakeven' | 'void';
 
 export interface MonthlyPnL {
   month: string; // YYYY-MM
@@ -72,6 +75,10 @@ export interface Settings {
   theme: Theme;
   privacyMode: boolean;
   userName: string;
+}
+
+export interface Goal {
+  targetPct: number;  // monthly % growth target, e.g. 5 for 5%
 }
 
 export interface TimeRange {

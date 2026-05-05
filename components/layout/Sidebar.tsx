@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard, Upload, ChevronLeft,
-  ChevronRight, BarChart2
+  ChevronRight, BarChart2, Target
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AnvilIcon } from "@/components/ui/AnvilIcon";
@@ -12,6 +12,7 @@ import { AnvilIcon } from "@/components/ui/AnvilIcon";
 const navItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
   { href: "/dashboard/charts", icon: BarChart2, label: "Charts" },
+  { href: "/dashboard/goals", icon: Target, label: "Goals" },
   { href: "/dashboard/import", icon: Upload, label: "Import CSV" },
 ];
 

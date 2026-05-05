@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useMemo, useCallback, useEffect, useRef } from "react";
-import { Trade, Settings, TimeRange, ClosedPosition, DailyPnL, MonthlyPnL, SymbolPnL, EquityPoint, Stats, Theme } from "@/types";
+import { Trade, Settings, TimeRange, ClosedPosition, DailyPnL, MonthlyPnL, SymbolPnL, EquityPoint, Stats, Theme, DayTag, Goal } from "@/types";
 import { MOCK_TRADES } from "@/lib/mock-data";
 import { createClient } from "@/lib/supabase/client";
 import {
@@ -31,11 +31,18 @@ interface DashboardContextValue {
   syncError: string | null;
   positions: ClosedPosition[];
   daily: DailyPnL[];
+  allDaily: DailyPnL[];
   monthly: MonthlyPnL[];
   symbols: SymbolPnL[];
   equity: EquityPoint[];
   stats: Stats;
   dowPnl: ReturnType<typeof calcDayOfWeekPnL>;
+  dayTags: Record<string, DayTag>;
+  setDayTag: (date: string, tag: DayTag | null) => void;
+  initialBalance: number;
+  setInitialBalance: (b: number) => void;
+  goal: Goal | null;
+  setGoal: (g: Goal | null) => void;
 }
 
 const DashboardContext = createContext<DashboardContextValue | null>(null);
@@ -74,6 +81,22 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
   const [syncError, setSyncError] = useState<string | null>(null);
+  const [dayTags, setDayTagsState] = useState<Record<string, DayTag>>(() => {
+    if (typeof window === "undefined") return {};
+    try { return JSON.parse(localStorage.getItem("tradeforge-day-tags") || "{}"); }
+    catch { return {}; }
+  });
+
+  const [initialBalance, setInitialBalanceState] = useState<number>(() => {
+    if (typeof window === "undefined") return 0;
+    return Number(localStorage.getItem("tradeforge-initial-balance") || "0");
+  });
+
+  const [goal, setGoalState] = useState<Goal | null>(() => {
+    if (typeof window === "undefined") return null;
+    try { return JSON.parse(localStorage.getItem("tradeforge-goal") || "null"); }
+    catch { return null; }
+  });
 
   const userIdRef = useRef<string | null>(null);
   const settingsRef = useRef<Settings>(settings);
@@ -186,6 +209,26 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  const setDayTag = useCallback((date: string, tag: DayTag | null) => {
+    setDayTagsState((prev) => {
+      const next = { ...prev };
+      if (tag === null) delete next[date];
+      else next[date] = tag;
+      localStorage.setItem("tradeforge-day-tags", JSON.stringify(next));
+      return next;
+    });
+  }, []);
+
+  const setInitialBalance = useCallback((b: number) => {
+    setInitialBalanceState(b);
+    localStorage.setItem("tradeforge-initial-balance", String(b));
+  }, []);
+
+  const setGoal = useCallback((g: Goal | null) => {
+    setGoalState(g);
+    localStorage.setItem("tradeforge-goal", JSON.stringify(g));
+  }, []);
+
   const positions = useMemo(() => matchTrades(trades), [trades]);
   const allDaily = useMemo(() => calcDailyPnL(positions), [positions]);
 
@@ -202,11 +245,29 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
     return positions.filter((p) => p.closeDate >= cutoffStr);
   }, [positions, timeRange.days]);
 
-  const monthly = useMemo(() => calcMonthlyPnL(daily), [daily]);
-  const symbols = useMemo(() => calcSymbolPnL(filteredPositions), [filteredPositions]);
-  const equity = useMemo(() => calcEquityCurve(daily), [daily]);
-  const stats = useMemo(() => calcStats(filteredPositions, daily), [filteredPositions, daily]);
-  const dowPnl = useMemo(() => calcDayOfWeekPnL(daily), [daily]);
+  const effectiveDaily = useMemo(() =>
+    daily
+      .filter((d) => dayTags[d.date] !== "void")
+      .map((d) => {
+        const tag = dayTags[d.date];
+        if (!tag) return d;
+        return { ...d, isWin: tag === "win", isBreakEven: tag === "breakeven" };
+      }),
+    [daily, dayTags]
+  );
+
+  const effectivePositions = useMemo(() => {
+    const voidDates = new Set(
+      Object.entries(dayTags).filter(([, v]) => v === "void").map(([date]) => date)
+    );
+    return voidDates.size === 0 ? filteredPositions : filteredPositions.filter((p) => !voidDates.has(p.closeDate));
+  }, [filteredPositions, dayTags]);
+
+  const monthly = useMemo(() => calcMonthlyPnL(effectiveDaily), [effectiveDaily]);
+  const symbols = useMemo(() => calcSymbolPnL(effectivePositions), [effectivePositions]);
+  const equity = useMemo(() => calcEquityCurve(effectiveDaily), [effectiveDaily]);
+  const stats = useMemo(() => calcStats(effectivePositions, effectiveDaily), [effectivePositions, effectiveDaily]);
+  const dowPnl = useMemo(() => calcDayOfWeekPnL(effectiveDaily), [effectiveDaily]);
 
   return (
     <DashboardContext.Provider value={{
@@ -215,7 +276,10 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
       settings, setSettings,
       loading, userId, syncError,
       positions: filteredPositions,
-      daily, monthly, symbols, equity, stats, dowPnl,
+      daily, allDaily, monthly, symbols, equity, stats, dowPnl,
+      dayTags, setDayTag,
+      initialBalance, setInitialBalance,
+      goal, setGoal,
     }}>
       {children}
     </DashboardContext.Provider>

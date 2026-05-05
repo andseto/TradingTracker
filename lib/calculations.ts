@@ -1,6 +1,6 @@
 import {
   Trade, ClosedPosition, DailyPnL, MonthlyPnL,
-  SymbolPnL, EquityPoint, Stats,
+  SymbolPnL, EquityPoint, Stats, Goal,
 } from "@/types";
 import { format, parseISO } from "date-fns";
 
@@ -187,7 +187,7 @@ export function calcStats(positions: ClosedPosition[], daily: DailyPnL[]): Stats
     worstDay: dailyPnls.length > 0 ? Math.min(...dailyPnls) : 0,
     tradingDays: daily.length,
     winDays: daily.filter((d) => d.isWin).length,
-    lossDays: daily.filter((d) => !d.isWin).length,
+    lossDays: daily.filter((d) => !d.isWin && !d.isBreakEven).length,
   };
 }
 
@@ -216,4 +216,74 @@ export function filterByDays<T extends { date: string }>(items: T[], days: numbe
   cutoff.setDate(cutoff.getDate() - days);
   const cutoffStr = cutoff.toISOString().split("T")[0];
   return items.filter((i) => i.date >= cutoffStr);
+}
+
+export interface MonthGoalProgress {
+  month: string;
+  label: string;
+  monthStartBalance: number;
+  endBalance: number;
+  goalAmount: number;
+  monthPnl: number;
+  progress: number;   // 0–1+, can exceed 1 if overachieved
+  isAchieved: boolean;
+  isCurrent: boolean;
+  daysRemaining: number;
+}
+
+function nextMonth(month: string): string {
+  const [y, m] = month.split("-").map(Number);
+  return m === 12 ? `${y + 1}-01` : `${y}-${String(m + 1).padStart(2, "0")}`;
+}
+
+export function calcMonthGoalProgress(
+  allDaily: DailyPnL[],
+  initialBalance: number,
+  goal: Goal,
+  month: string,
+): MonthGoalProgress {
+  const monthStart = `${month}-01`;
+  const nextMonthStart = `${nextMonth(month)}-01`;
+  const today = new Date().toISOString().slice(0, 10);
+  const isCurrent = month === today.slice(0, 7);
+
+  const prevPnl = allDaily
+    .filter((d) => d.date < monthStart)
+    .reduce((s, d) => s + d.pnl, 0);
+
+  const monthPnl = allDaily
+    .filter((d) => d.date >= monthStart && d.date < nextMonthStart)
+    .reduce((s, d) => s + d.pnl, 0);
+
+  const monthStartBalance = initialBalance + prevPnl;
+  const endBalance = monthStartBalance + monthPnl;
+  const goalAmount = monthStartBalance * (1 + goal.targetPct / 100);
+  const needed = goalAmount - monthStartBalance;
+  const progress = needed > 0 ? monthPnl / needed : 1;
+
+  let daysRemaining = 0;
+  if (isCurrent) {
+    const lastDay = new Date(Number(month.slice(0, 4)), Number(month.slice(5, 7)), 0).getDate();
+    daysRemaining = lastDay - Number(today.slice(8, 10));
+  }
+
+  return {
+    month,
+    label: format(parseISO(monthStart), "MMMM yyyy"),
+    monthStartBalance: parseFloat(monthStartBalance.toFixed(2)),
+    endBalance: parseFloat(endBalance.toFixed(2)),
+    goalAmount: parseFloat(goalAmount.toFixed(2)),
+    monthPnl: parseFloat(monthPnl.toFixed(2)),
+    progress: parseFloat(progress.toFixed(4)),
+    isAchieved: endBalance >= goalAmount,
+    isCurrent,
+    daysRemaining,
+  };
+}
+
+export function getMonthsFromDaily(allDaily: DailyPnL[]): string[] {
+  const months = new Set(allDaily.map((d) => d.date.slice(0, 7)));
+  const current = new Date().toISOString().slice(0, 7);
+  months.add(current);
+  return [...months].sort();
 }
