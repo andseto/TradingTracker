@@ -1,6 +1,6 @@
 "use client";
 
-import { Settings, Upload, Eye, EyeOff } from "lucide-react";
+import { Settings, Upload, Eye, EyeOff, Share2 } from "lucide-react";
 import { useDashboard } from "@/context/DashboardContext";
 import { TIME_RANGES } from "@/context/DashboardContext";
 import { cn } from "@/lib/utils";
@@ -8,9 +8,10 @@ import Link from "next/link";
 
 interface HeaderProps {
   onOpenSettings: () => void;
+  onOpenShare: () => void;
 }
 
-export function Header({ onOpenSettings }: HeaderProps) {
+export function Header({ onOpenSettings, onOpenShare }: HeaderProps) {
   const { timeRange, setTimeRange, settings, setSettings } = useDashboard();
 
   return (
@@ -48,6 +49,17 @@ export function Header({ onOpenSettings }: HeaderProps) {
           Hey, <span style={{ color: "var(--text-1)" }}>{settings.userName}</span>
         </span>
       )}
+
+      {/* Share */}
+      <button
+        onClick={onOpenShare}
+        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium border transition-colors hover:border-indigo-500/40 hover:text-indigo-400"
+        style={{ color: "var(--text-2)", borderColor: "var(--c-border)", background: "var(--bg-base)" }}
+        title="Share your stats"
+      >
+        <Share2 className="w-3.5 h-3.5" />
+        <span className="hidden sm:inline">Share</span>
+      </button>
 
       {/* Privacy toggle */}
       <button

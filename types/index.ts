@@ -89,3 +89,10 @@ export interface TimeRange {
   value: string;
   days: number | null;
 }
+
+export interface JournalEntry {
+  date: string;
+  notes: string;
+  rating: number | null; // 1–5
+  tags: string[];
+}

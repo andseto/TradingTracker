@@ -6,7 +6,8 @@ import { ChartCard } from "@/components/ui/ChartCard";
 import { fmtMoneyFull } from "@/lib/utils";
 import { format, parseISO, eachDayOfInterval, startOfMonth, endOfMonth, startOfWeek, endOfWeek, isSameMonth } from "date-fns";
 import { cn } from "@/lib/utils";
-import { ChevronLeft, ChevronRight, X, TrendingUp, TrendingDown, Minus, Ban } from "lucide-react";
+import { ChevronLeft, ChevronRight, X, TrendingUp, TrendingDown, Minus, Ban, BookOpen } from "lucide-react";
+import Link from "next/link";
 import { ClosedPosition, DayTag } from "@/types";
 
 const DOW = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
@@ -42,9 +43,10 @@ interface DayDetailProps {
   tag: DayTag | undefined;
   onTagChange: (tag: DayTag | null) => void;
   onClose: () => void;
+  hasJournalEntry: boolean;
 }
 
-function DayDetail({ date, pnl, trades, privacy, tag, onTagChange, onClose }: DayDetailProps) {
+function DayDetail({ date, pnl, trades, privacy, tag, onTagChange, onClose, hasJournalEntry }: DayDetailProps) {
   const effectiveWin = tag === "win" || (!tag && pnl >= 0);
   const isBreakEven  = tag === "breakeven";
   const isVoid       = tag === "void";
@@ -81,9 +83,23 @@ function DayDetail({ date, pnl, trades, privacy, tag, onTagChange, onClose }: Da
               {dayLabel}
             </span>
           </div>
-          <button onClick={onClose} className="transition-colors" style={{ color: "var(--text-3)" }}>
-            <X className="w-3.5 h-3.5" />
-          </button>
+          <div className="flex items-center gap-2">
+            <Link
+              href={`/dashboard/journal/${date}`}
+              className={cn(
+                "flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium transition-colors",
+                hasJournalEntry
+                  ? "text-indigo-300 bg-indigo-500/15 border border-indigo-500/30"
+                  : "text-indigo-400 hover:text-indigo-300 hover:bg-indigo-500/10 border border-indigo-500/20"
+              )}
+            >
+              <BookOpen className="w-3 h-3" />
+              {hasJournalEntry ? "View Journal" : "Add Journal"}
+            </Link>
+            <button onClick={onClose} className="transition-colors" style={{ color: "var(--text-3)" }}>
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
 
         {/* Tag override selector */}
@@ -199,7 +215,7 @@ interface CalendarHeatmapProps {
 }
 
 export function CalendarHeatmap({ bare = false }: CalendarHeatmapProps) {
-  const { daily, positions, settings, dayTags, setDayTag } = useDashboard();
+  const { daily, positions, settings, dayTags, setDayTag, journalEntries } = useDashboard();
 
   const gainText = settings.theme === "light" ? "#16a34a" : "#86efac";
   const lossText = settings.theme === "light" ? "#dc2626" : "#fca5a5";
@@ -377,6 +393,9 @@ export function CalendarHeatmap({ bare = false }: CalendarHeatmapProps) {
                   {inMonth && data && isVoid && (
                     <span className="text-[10px]" style={{ color: "var(--text-3)" }}>void</span>
                   )}
+                  {inMonth && data && journalEntries[key] && (
+                    <span className="w-1 h-1 rounded-full bg-indigo-400 opacity-70" />
+                  )}
                 </div>
               );
             })}
@@ -417,6 +436,7 @@ export function CalendarHeatmap({ bare = false }: CalendarHeatmapProps) {
           tag={dayTags[selectedDate]}
           onTagChange={(t) => setDayTag(selectedDate, t)}
           onClose={() => setSelectedDate(null)}
+          hasJournalEntry={!!journalEntries[selectedDate]}
         />
       )}
 

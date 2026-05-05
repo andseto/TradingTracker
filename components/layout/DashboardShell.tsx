@@ -4,11 +4,13 @@ import { useState, useEffect } from "react";
 import { Sidebar } from "./Sidebar";
 import { Header } from "./Header";
 import { SettingsModal } from "@/components/ui/SettingsModal";
+import { ShareModal } from "@/components/ui/ShareModal";
 import { DashboardProvider, useDashboard } from "@/context/DashboardContext";
 
 function ShellInner({ children }: { children: React.ReactNode }) {
   const { settings, loading } = useDashboard();
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   useEffect(() => {
@@ -34,12 +36,13 @@ function ShellInner({ children }: { children: React.ReactNode }) {
     <div className="flex h-screen overflow-hidden" style={{ background: "var(--bg-base)" }}>
       <Sidebar collapsed={sidebarCollapsed} onToggle={() => setSidebarCollapsed(!sidebarCollapsed)} />
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
-        <Header onOpenSettings={() => setSettingsOpen(true)} />
+        <Header onOpenSettings={() => setSettingsOpen(true)} onOpenShare={() => setShareOpen(true)} />
         <main className="flex-1 overflow-auto p-4 lg:p-6">
           {children}
         </main>
       </div>
       <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
+      <ShareModal open={shareOpen} onClose={() => setShareOpen(false)} />
     </div>
   );
 }

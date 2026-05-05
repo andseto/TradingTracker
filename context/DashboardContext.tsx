@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useMemo, useCallback, useEffect, useRef } from "react";
-import { Trade, Settings, TimeRange, ClosedPosition, DailyPnL, MonthlyPnL, SymbolPnL, EquityPoint, Stats, Theme, DayTag, Goal } from "@/types";
+import { Trade, Settings, TimeRange, ClosedPosition, DailyPnL, MonthlyPnL, SymbolPnL, EquityPoint, Stats, Theme, DayTag, Goal, JournalEntry } from "@/types";
 import { MOCK_TRADES } from "@/lib/mock-data";
 import { createClient } from "@/lib/supabase/client";
 import {
@@ -41,6 +41,9 @@ interface DashboardContextValue {
   setDayTag: (date: string, tag: DayTag | null) => void;
   goal: Goal | null;
   setGoal: (g: Goal | null) => void;
+  allPositions: ClosedPosition[];
+  journalEntries: Record<string, JournalEntry>;
+  setJournalEntry: (date: string, entry: JournalEntry | null) => void;
 }
 
 const DashboardContext = createContext<DashboardContextValue | null>(null);
@@ -224,6 +227,22 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem("tradeforge-goal", JSON.stringify(g));
   }, []);
 
+  const [journalEntries, setJournalEntriesState] = useState<Record<string, JournalEntry>>(() => {
+    if (typeof window === "undefined") return {};
+    try { return JSON.parse(localStorage.getItem("tradeforge-journal") || "{}"); }
+    catch { return {}; }
+  });
+
+  const setJournalEntry = useCallback((date: string, entry: JournalEntry | null) => {
+    setJournalEntriesState((prev) => {
+      const next = { ...prev };
+      if (entry === null) delete next[date];
+      else next[date] = entry;
+      localStorage.setItem("tradeforge-journal", JSON.stringify(next));
+      return next;
+    });
+  }, []);
+
   const positions = useMemo(() => matchTrades(trades), [trades]);
   const allDaily = useMemo(() => calcDailyPnL(positions), [positions]);
 
@@ -271,9 +290,11 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
       settings, setSettings,
       loading, userId, syncError,
       positions: filteredPositions,
+      allPositions: positions,
       daily, allDaily, monthly, symbols, equity, stats, dowPnl,
       dayTags, setDayTag,
       goal, setGoal,
+      journalEntries, setJournalEntry,
     }}>
       {children}
     </DashboardContext.Provider>
