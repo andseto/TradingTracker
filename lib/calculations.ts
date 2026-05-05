@@ -218,72 +218,115 @@ export function filterByDays<T extends { date: string }>(items: T[], days: numbe
   return items.filter((i) => i.date >= cutoffStr);
 }
 
-export interface MonthGoalProgress {
+export type GoalMonthStatus = "past" | "current" | "future";
+
+export interface GoalMonth {
   month: string;
   label: string;
-  monthStartBalance: number;
-  endBalance: number;
+  status: GoalMonthStatus;
+  startBalance: number;
+  endBalance: number;      // actual for past/current, projected (= goal) for future
   goalAmount: number;
-  monthPnl: number;
-  progress: number;   // 0–1+, can exceed 1 if overachieved
-  isAchieved: boolean;
-  isCurrent: boolean;
-  daysRemaining: number;
+  monthPnl: number | null; // null for future
+  gainPct: number | null;  // null for future
+  progress: number;        // 0–1 clamped for bar; null for future
+  isAchieved: boolean | null;
+  daysRemaining: number;   // only meaningful when status === "current"
 }
 
-function nextMonth(month: string): string {
+function shiftMonth(month: string, by: number): string {
   const [y, m] = month.split("-").map(Number);
-  return m === 12 ? `${y + 1}-01` : `${y}-${String(m + 1).padStart(2, "0")}`;
+  const total = m - 1 + by;
+  const newYear = y + Math.floor(total / 12);
+  const newMonth = ((total % 12) + 12) % 12 + 1;
+  return `${newYear}-${String(newMonth).padStart(2, "0")}`;
 }
 
-export function calcMonthGoalProgress(
-  allDaily: DailyPnL[],
-  initialBalance: number,
-  goal: Goal,
-  month: string,
-): MonthGoalProgress {
-  const monthStart = `${month}-01`;
-  const nextMonthStart = `${nextMonth(month)}-01`;
-  const today = new Date().toISOString().slice(0, 10);
-  const isCurrent = month === today.slice(0, 7);
-
-  const prevPnl = allDaily
-    .filter((d) => d.date < monthStart)
-    .reduce((s, d) => s + d.pnl, 0);
-
-  const monthPnl = allDaily
-    .filter((d) => d.date >= monthStart && d.date < nextMonthStart)
-    .reduce((s, d) => s + d.pnl, 0);
-
-  const monthStartBalance = initialBalance + prevPnl;
-  const endBalance = monthStartBalance + monthPnl;
-  const goalAmount = monthStartBalance * (1 + goal.targetPct / 100);
-  const needed = goalAmount - monthStartBalance;
-  const progress = needed > 0 ? monthPnl / needed : 1;
-
-  let daysRemaining = 0;
-  if (isCurrent) {
-    const lastDay = new Date(Number(month.slice(0, 4)), Number(month.slice(5, 7)), 0).getDate();
-    daysRemaining = lastDay - Number(today.slice(8, 10));
+function monthRange(start: string, end: string): string[] {
+  const out: string[] = [];
+  let cur = start;
+  while (cur <= end) {
+    out.push(cur);
+    cur = shiftMonth(cur, 1);
   }
-
-  return {
-    month,
-    label: format(parseISO(monthStart), "MMMM yyyy"),
-    monthStartBalance: parseFloat(monthStartBalance.toFixed(2)),
-    endBalance: parseFloat(endBalance.toFixed(2)),
-    goalAmount: parseFloat(goalAmount.toFixed(2)),
-    monthPnl: parseFloat(monthPnl.toFixed(2)),
-    progress: parseFloat(progress.toFixed(4)),
-    isAchieved: endBalance >= goalAmount,
-    isCurrent,
-    daysRemaining,
-  };
+  return out;
 }
 
-export function getMonthsFromDaily(allDaily: DailyPnL[]): string[] {
-  const months = new Set(allDaily.map((d) => d.date.slice(0, 7)));
-  const current = new Date().toISOString().slice(0, 7);
-  months.add(current);
-  return [...months].sort();
+export function calcAllGoalMonths(allDaily: DailyPnL[], goal: Goal, futureCount = 6): GoalMonth[] {
+  const today = new Date().toISOString().slice(0, 10);
+  const currentMonth = today.slice(0, 7);
+  const endMonth = shiftMonth(currentMonth, futureCount);
+  const months = monthRange(goal.startMonth, endMonth);
+
+  let runningBalance = goal.startBalance;
+
+  return months.map((month) => {
+    const monthStart = `${month}-01`;
+    const nextMonthStr = shiftMonth(month, 1);
+    const nextMonthStart = `${nextMonthStr}-01`;
+
+    const status: GoalMonthStatus =
+      month < currentMonth ? "past" : month === currentMonth ? "current" : "future";
+
+    const startBalance = parseFloat(runningBalance.toFixed(2));
+    const goalAmount = parseFloat((startBalance * (1 + goal.targetPct / 100)).toFixed(2));
+
+    let monthPnl: number | null = null;
+    let endBalance: number;
+    let isAchieved: boolean | null = null;
+    let daysRemaining = 0;
+
+    if (status === "future") {
+      endBalance = goalAmount; // optimistic projection
+    } else {
+      monthPnl = parseFloat(
+        allDaily
+          .filter((d) => d.date >= monthStart && d.date < nextMonthStart)
+          .reduce((s, d) => s + d.pnl, 0)
+          .toFixed(2)
+      );
+      endBalance = parseFloat((startBalance + monthPnl).toFixed(2));
+      isAchieved = endBalance >= goalAmount;
+
+      if (status === "current") {
+        const lastDayOfMonth = new Date(
+          Number(month.slice(0, 4)),
+          Number(month.slice(5, 7)),
+          0
+        ).getDate();
+        daysRemaining = lastDayOfMonth - Number(today.slice(8, 10));
+      }
+    }
+
+    const gainPct =
+      monthPnl !== null && startBalance > 0
+        ? parseFloat(((monthPnl / startBalance) * 100).toFixed(2))
+        : null;
+
+    const needed = goalAmount - startBalance;
+    const rawProgress =
+      status !== "future" && monthPnl !== null && needed > 0
+        ? monthPnl / needed
+        : status === "future"
+        ? 1
+        : 0;
+    const progress = Math.min(1, Math.max(0, rawProgress));
+
+    // next month starts from: actual end (past), actual end (current), projected goal (future)
+    runningBalance = status === "future" ? goalAmount : endBalance;
+
+    return {
+      month,
+      label: format(parseISO(monthStart), "MMMM yyyy"),
+      status,
+      startBalance,
+      endBalance,
+      goalAmount,
+      monthPnl,
+      gainPct,
+      progress: parseFloat(progress.toFixed(4)),
+      isAchieved,
+      daysRemaining,
+    };
+  });
 }

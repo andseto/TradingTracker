@@ -39,8 +39,6 @@ interface DashboardContextValue {
   dowPnl: ReturnType<typeof calcDayOfWeekPnL>;
   dayTags: Record<string, DayTag>;
   setDayTag: (date: string, tag: DayTag | null) => void;
-  initialBalance: number;
-  setInitialBalance: (b: number) => void;
   goal: Goal | null;
   setGoal: (g: Goal | null) => void;
 }
@@ -85,11 +83,6 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
     if (typeof window === "undefined") return {};
     try { return JSON.parse(localStorage.getItem("tradeforge-day-tags") || "{}"); }
     catch { return {}; }
-  });
-
-  const [initialBalance, setInitialBalanceState] = useState<number>(() => {
-    if (typeof window === "undefined") return 0;
-    return Number(localStorage.getItem("tradeforge-initial-balance") || "0");
   });
 
   const [goal, setGoalState] = useState<Goal | null>(() => {
@@ -219,11 +212,6 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
-  const setInitialBalance = useCallback((b: number) => {
-    setInitialBalanceState(b);
-    localStorage.setItem("tradeforge-initial-balance", String(b));
-  }, []);
-
   const setGoal = useCallback((g: Goal | null) => {
     setGoalState(g);
     localStorage.setItem("tradeforge-goal", JSON.stringify(g));
@@ -278,7 +266,6 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
       positions: filteredPositions,
       daily, allDaily, monthly, symbols, equity, stats, dowPnl,
       dayTags, setDayTag,
-      initialBalance, setInitialBalance,
       goal, setGoal,
     }}>
       {children}
