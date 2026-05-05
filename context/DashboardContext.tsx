@@ -87,8 +87,15 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
 
   const [goal, setGoalState] = useState<Goal | null>(() => {
     if (typeof window === "undefined") return null;
-    try { return JSON.parse(localStorage.getItem("tradeforge-goal") || "null"); }
-    catch { return null; }
+    try {
+      const raw = JSON.parse(localStorage.getItem("tradeforge-goal") || "null");
+      // Discard old format that is missing required fields
+      if (!raw || typeof raw.targetPct !== "number" || !raw.startMonth || typeof raw.startBalance !== "number") {
+        localStorage.removeItem("tradeforge-goal");
+        return null;
+      }
+      return raw as Goal;
+    } catch { return null; }
   });
 
   const userIdRef = useRef<string | null>(null);
