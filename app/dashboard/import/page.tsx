@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { Upload, FileText, CheckCircle, AlertCircle, X, RefreshCw, Info } from "lucide-react";
+import { Upload, FileText, CheckCircle, AlertCircle, X, RefreshCw, Info, DollarSign } from "lucide-react";
 import { useDashboard } from "@/context/DashboardContext";
 import { parseFidelityCSV, parseIBKRCSV } from "@/lib/csv-parser";
 import { MOCK_TRADES } from "@/lib/mock-data";
@@ -16,12 +16,31 @@ interface ParseResult {
 }
 
 export default function ImportPage() {
-  const { trades, setTrades, addTrades, userId, syncError } = useDashboard();
+  const { trades, setTrades, addTrades, userId, syncError, goal, setGoal } = useDashboard();
   const [dragging, setDragging] = useState(false);
   const [results, setResults] = useState<ParseResult[]>([]);
   const [processing, setProcessing] = useState(false);
   const [appendMode, setAppendMode] = useState(false);
   const [broker, setBroker] = useState<"fidelity" | "ibkr">("ibkr");
+  const [balanceInput, setBalanceInput] = useState(() =>
+    goal?.startBalance != null ? String(goal.startBalance) : ""
+  );
+  const [balanceSaved, setBalanceSaved] = useState(false);
+
+  const saveStartingBalance = useCallback(() => {
+    const val = parseFloat(balanceInput.replace(/[$,]/g, ""));
+    if (isNaN(val)) return;
+    const today = new Date();
+    const startMonth = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}`;
+    setGoal({
+      targetPct: goal?.targetPct ?? 0,
+      startMonth: goal?.startMonth ?? startMonth,
+      startBalance: val,
+      monthBalances: goal?.monthBalances,
+    });
+    setBalanceSaved(true);
+    setTimeout(() => setBalanceSaved(false), 2000);
+  }, [balanceInput, goal, setGoal]);
 
   const isUsingDemoData = trades === MOCK_TRADES || (
     trades.length > 0 && trades[0].id.startsWith("T")
@@ -139,6 +158,33 @@ export default function ImportPage() {
             )}
           >
             Fidelity
+          </button>
+        </div>
+      </div>
+
+      {/* Starting balance */}
+      <div className="mb-4 flex items-center gap-3 p-3 bg-[#131316] border border-[#2a2a35] rounded-xl">
+        <DollarSign className="w-4 h-4 text-[#9090a8] shrink-0" />
+        <span className="text-xs text-[#9090a8] whitespace-nowrap">Starting balance:</span>
+        <div className="flex flex-1 items-center gap-2">
+          <input
+            type="text"
+            value={balanceInput}
+            onChange={(e) => { setBalanceInput(e.target.value); setBalanceSaved(false); }}
+            onKeyDown={(e) => e.key === "Enter" && saveStartingBalance()}
+            placeholder="e.g. 25000"
+            className="flex-1 min-w-0 bg-[#0d0d0f] border border-[#2a2a35] rounded-lg px-3 py-1.5 text-xs text-[#e8e8f0] placeholder:text-[#55556a] focus:outline-none focus:border-indigo-500"
+          />
+          <button
+            onClick={saveStartingBalance}
+            className={cn(
+              "px-3 py-1.5 text-xs font-medium rounded-lg transition-colors whitespace-nowrap",
+              balanceSaved
+                ? "bg-green-500/20 text-green-400 border border-green-500/30"
+                : "bg-indigo-600 hover:bg-indigo-500 text-white"
+            )}
+          >
+            {balanceSaved ? "Saved!" : "Save"}
           </button>
         </div>
       </div>
