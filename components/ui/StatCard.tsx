@@ -20,7 +20,7 @@ export function StatCard({ label, value, subValue, trend, icon: Icon, className 
 
   return (
     <div
-      className={cn("rounded-xl p-4 flex flex-col gap-2 border transition-colors", className)}
+      className={cn("rounded-xl p-3 md:p-4 flex flex-col gap-1.5 md:gap-2 border transition-colors", className)}
       style={{ background: "var(--bg-card)", borderColor: "var(--c-border)" }}
     >
       <div className="flex items-center justify-between">
@@ -33,7 +33,7 @@ export function StatCard({ label, value, subValue, trend, icon: Icon, className 
           </div>
         )}
       </div>
-      <div className="font-mono font-semibold text-xl tracking-tight" style={{ color: trendColor ?? "var(--text-1)" }}>
+      <div className="font-mono font-semibold text-base md:text-xl tracking-tight" style={{ color: trendColor ?? "var(--text-1)" }}>
         {value}
       </div>
       {subValue && (

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Sidebar } from "./Sidebar";
 import { Header } from "./Header";
+import { MobileNav } from "./MobileNav";
 import { SettingsModal } from "@/components/ui/SettingsModal";
 import { ShareModal } from "@/components/ui/ShareModal";
 import { DashboardProvider, useDashboard } from "@/context/DashboardContext";
@@ -37,10 +38,11 @@ function ShellInner({ children }: { children: React.ReactNode }) {
       <Sidebar collapsed={sidebarCollapsed} onToggle={() => setSidebarCollapsed(!sidebarCollapsed)} />
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
         <Header onOpenSettings={() => setSettingsOpen(true)} onOpenShare={() => setShareOpen(true)} />
-        <main className="flex-1 overflow-auto p-4 lg:p-6">
+        <main className="flex-1 overflow-auto p-3 pb-20 md:pb-6 lg:p-6">
           {children}
         </main>
       </div>
+      <MobileNav />
       <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
       <ShareModal open={shareOpen} onClose={() => setShareOpen(false)} />
     </div>

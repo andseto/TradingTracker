@@ -27,7 +27,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
 
   return (
     <aside
-      className={cn("flex flex-col border-r transition-all duration-200 shrink-0", collapsed ? "w-14" : "w-52")}
+      className={cn("hidden md:flex flex-col border-r transition-all duration-200 shrink-0", collapsed ? "w-14" : "w-52")}
       style={{ background: "var(--bg-surface)", borderColor: "var(--c-border)" }}
     >
       {/* Logo */}
