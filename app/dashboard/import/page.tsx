@@ -3,7 +3,7 @@
 import { useState, useCallback } from "react";
 import { Upload, FileText, CheckCircle, AlertCircle, X, RefreshCw, Info } from "lucide-react";
 import { useDashboard } from "@/context/DashboardContext";
-import { parseFidelityCSV } from "@/lib/csv-parser";
+import { parseFidelityCSV, parseIBKRCSV } from "@/lib/csv-parser";
 import { MOCK_TRADES } from "@/lib/mock-data";
 import { Trade } from "@/types";
 import { cn } from "@/lib/utils";
@@ -21,6 +21,7 @@ export default function ImportPage() {
   const [results, setResults] = useState<ParseResult[]>([]);
   const [processing, setProcessing] = useState(false);
   const [appendMode, setAppendMode] = useState(false);
+  const [broker, setBroker] = useState<"fidelity" | "ibkr">("ibkr");
 
   const isUsingDemoData = trades === MOCK_TRADES || (
     trades.length > 0 && trades[0].id.startsWith("T")
@@ -29,15 +30,16 @@ export default function ImportPage() {
   const processFile = useCallback(async (file: File) => {
     const text = await file.text();
     try {
-      const parsed = parseFidelityCSV(text);
+      const parsed = broker === "ibkr" ? parseIBKRCSV(text) : parseFidelityCSV(text);
+      const brokerLabel = broker === "ibkr" ? "Interactive Brokers Flex Query" : "Fidelity account history";
       if (parsed.length === 0) {
-        return { trades: [], filename: file.name, status: "error" as const, message: "No valid trades found. Make sure this is a Fidelity account history CSV." };
+        return { trades: [], filename: file.name, status: "error" as const, message: `No valid trades found. Make sure this is a ${brokerLabel} CSV.` };
       }
       return { trades: parsed, filename: file.name, status: "success" as const, message: `Parsed ${parsed.length} transactions` };
     } catch {
       return { trades: [], filename: file.name, status: "error" as const, message: "Failed to parse file" };
     }
-  }, []);
+  }, [broker]);
 
   const handleFiles = useCallback(async (files: FileList | File[]) => {
     setProcessing(true);
@@ -67,9 +69,9 @@ export default function ImportPage() {
       <div className="mb-6">
         <h1 className="text-xl font-bold text-[#e8e8f0]">Import CSV</h1>
         <p className="text-sm text-[#9090a8] mt-1">
-          Upload Fidelity account history CSV files. Go to{" "}
-          <span className="text-indigo-400">Accounts &amp; Trade → Account History</span>{" "}
-          on Fidelity and download as CSV.
+          {broker === "ibkr"
+            ? "Upload Interactive Brokers Flex Query CSV files. Select the IBKR broker below, then drop your exported file."
+            : <>Upload Fidelity account history CSV files. Go to{" "}<span className="text-indigo-400">Accounts &amp; Trade → Account History</span>{" "}on Fidelity and download as CSV.</>}
         </p>
       </div>
 
@@ -104,7 +106,7 @@ export default function ImportPage() {
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-amber-300">You're viewing demo data</p>
             <p className="text-xs text-amber-400/70 mt-0.5">
-              The dashboard is showing randomly generated trades. Import your real Fidelity CSV to see accurate information.
+              The dashboard is showing randomly generated trades. Import your real CSV to see accurate information.
             </p>
           </div>
           <button
@@ -115,6 +117,31 @@ export default function ImportPage() {
           </button>
         </div>
       )}
+
+      {/* Broker selector */}
+      <div className="mb-4 flex items-center gap-3 p-3 bg-[#131316] border border-[#2a2a35] rounded-xl">
+        <span className="text-xs text-[#9090a8]">Broker:</span>
+        <div className="flex rounded-lg bg-[#0d0d0f] p-0.5 border border-[#2a2a35]">
+          <button
+            onClick={() => setBroker("ibkr")}
+            className={cn(
+              "px-3 py-1 text-xs font-medium rounded-md transition-colors",
+              broker === "ibkr" ? "bg-[#1a1a1f] text-white" : "text-[#9090a8] hover:text-[#e8e8f0]"
+            )}
+          >
+            Interactive Brokers
+          </button>
+          <button
+            onClick={() => setBroker("fidelity")}
+            className={cn(
+              "px-3 py-1 text-xs font-medium rounded-md transition-colors",
+              broker === "fidelity" ? "bg-[#1a1a1f] text-white" : "text-[#9090a8] hover:text-[#e8e8f0]"
+            )}
+          >
+            Fidelity
+          </button>
+        </div>
+      </div>
 
       {/* Replace / Append toggle */}
       <div className="mb-4 flex items-center gap-3 p-3 bg-[#131316] border border-[#2a2a35] rounded-xl">
@@ -164,7 +191,9 @@ export default function ImportPage() {
           <p className="text-sm font-medium text-[#e8e8f0]">
             {processing ? "Processing..." : "Drop CSV files here"}
           </p>
-          <p className="text-xs text-[#55556a] mt-1">or click to browse — Fidelity Account History format</p>
+          <p className="text-xs text-[#55556a] mt-1">
+            {broker === "ibkr" ? "or click to browse — Interactive Brokers Flex Query format" : "or click to browse — Fidelity Account History format"}
+          </p>
         </div>
         <input
           id="csv-input"
@@ -180,7 +209,9 @@ export default function ImportPage() {
       <div className="mt-4 bg-[#131316] border border-[#2a2a35] rounded-xl p-4">
         <p className="text-xs font-medium text-[#9090a8] uppercase tracking-wide mb-2">Expected CSV columns</p>
         <code className="text-xs text-[#55556a] font-mono">
-          Run Date, Action, Symbol, Security Description, Security Type, Quantity, Price ($), Commission ($), Amount ($)
+          {broker === "ibkr"
+            ? "Symbol, Description, AssetClass, TradeDate, Buy/Sell, Quantity, Price, Commission, NetCash"
+            : "Run Date, Action, Symbol, Security Description, Security Type, Quantity, Price ($), Commission ($), Amount ($)"}
         </code>
       </div>
 
