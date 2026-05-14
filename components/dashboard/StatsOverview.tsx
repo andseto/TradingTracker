@@ -6,14 +6,18 @@ import { StatCard } from "@/components/ui/StatCard";
 import { fmtMoney, fmtPct, fmtMoneyFull } from "@/lib/utils";
 
 export function StatsOverview() {
-  const { stats, settings } = useDashboard();
+  const { stats, settings, goal } = useDashboard();
   const p = settings.privacyMode;
+  const startBalance = goal?.startBalance ?? 0;
+  const accountBalance = startBalance > 0 ? startBalance + stats.totalPnl : null;
 
   const cards = [
     {
-      label: "Total P&L",
-      value: fmtMoneyFull(stats.totalPnl, p),
-      subValue: fmtPct(stats.totalPnlPct, p),
+      label: accountBalance !== null ? "Account Balance" : "Total P&L",
+      value: accountBalance !== null ? fmtMoneyFull(accountBalance, p) : fmtMoneyFull(stats.totalPnl, p),
+      subValue: accountBalance !== null
+        ? `P&L: ${stats.totalPnl >= 0 ? "+" : ""}${fmtMoneyFull(stats.totalPnl, p)} (${fmtPct(stats.totalPnlPct, p)})`
+        : fmtPct(stats.totalPnlPct, p),
       trend: stats.totalPnl >= 0 ? "up" as const : "down" as const,
       icon: stats.totalPnl >= 0 ? TrendingUp : TrendingDown,
     },

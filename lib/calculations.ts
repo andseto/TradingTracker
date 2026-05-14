@@ -158,7 +158,7 @@ export function calcEquityCurve(daily: DailyPnL[]): EquityPoint[] {
   return points;
 }
 
-export function calcStats(positions: ClosedPosition[], daily: DailyPnL[]): Stats {
+export function calcStats(positions: ClosedPosition[], daily: DailyPnL[], startBalance = 25000): Stats {
   if (positions.length === 0) {
     return {
       totalPnl: 0, totalPnlPct: 0, winRate: 0, profitFactor: 0,
@@ -173,11 +173,11 @@ export function calcStats(positions: ClosedPosition[], daily: DailyPnL[]): Stats
   const grossLoss = Math.abs(losses.reduce((s, p) => s + p.pnl, 0));
 
   const dailyPnls = daily.map((d) => d.pnl);
-  const initialCapital = 25000; // assumed starting capital for % calc
+  const totalPnl = parseFloat(positions.reduce((s, p) => s + p.pnl, 0).toFixed(2));
 
   return {
-    totalPnl: parseFloat(positions.reduce((s, p) => s + p.pnl, 0).toFixed(2)),
-    totalPnlPct: parseFloat(((positions.reduce((s, p) => s + p.pnl, 0) / initialCapital) * 100).toFixed(2)),
+    totalPnl,
+    totalPnlPct: startBalance > 0 ? parseFloat(((totalPnl / startBalance) * 100).toFixed(2)) : 0,
     winRate: parseFloat(((wins.length / positions.length) * 100).toFixed(1)),
     profitFactor: grossLoss > 0 ? parseFloat((grossProfit / grossLoss).toFixed(2)) : grossProfit > 0 ? 999 : 0,
     totalTrades: positions.length,

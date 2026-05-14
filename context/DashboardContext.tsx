@@ -280,7 +280,7 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
   const monthly = useMemo(() => calcMonthlyPnL(effectiveDaily), [effectiveDaily]);
   const symbols = useMemo(() => calcSymbolPnL(effectivePositions), [effectivePositions]);
   const equity = useMemo(() => calcEquityCurve(effectiveDaily), [effectiveDaily]);
-  const stats = useMemo(() => calcStats(effectivePositions, effectiveDaily), [effectivePositions, effectiveDaily]);
+  const stats = useMemo(() => calcStats(effectivePositions, effectiveDaily, goal?.startBalance ?? 25000), [effectivePositions, effectiveDaily, goal?.startBalance]);
   const dowPnl = useMemo(() => calcDayOfWeekPnL(effectiveDaily), [effectiveDaily]);
 
   return (
