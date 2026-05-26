@@ -57,6 +57,7 @@ export function GoalsContent() {
 
   const defaultStart = goal ? parseYYYYMM(goal.startMonth) : { month: 4, year: CURRENT_YEAR };
 
+  const [projectionMode, setProjectionMode] = useState<"actual" | "compound">("actual");
   const [editing, setEditing] = useState(!isSetup);
   const [formMonth, setFormMonth] = useState(defaultStart.month);
   const [formYear, setFormYear] = useState(defaultStart.year);
@@ -89,8 +90,8 @@ export function GoalsContent() {
 
   const allMonths = useMemo(() => {
     if (!isSetup) return [];
-    return calcAllGoalMonths(allDaily, goal!, 6);
-  }, [allDaily, goal, isSetup]);
+    return calcAllGoalMonths(allDaily, goal!, 6, projectionMode);
+  }, [allDaily, goal, isSetup, projectionMode]);
 
   const current = allMonths.find((m) => m.status === "current") ?? null;
   const pastMonths = allMonths.filter((m) => m.status === "past").reverse();
@@ -345,13 +346,31 @@ export function GoalsContent() {
       {/* ── Upcoming projections ── */}
       {isSetup && !editing && futureMonths.length > 0 && (
         <section>
-          <div className="flex items-center gap-2 mb-3">
-            <h2 className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-3)" }}>
-              Upcoming Projections
-            </h2>
-            <span className="text-xs px-2 py-0.5 rounded-full border" style={{ borderColor: "var(--c-border)", color: "var(--text-3)" }}>
-              assumes +{goal!.targetPct}% each month
-            </span>
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <h2 className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-3)" }}>
+                Upcoming Projections
+              </h2>
+              <span className="text-xs px-2 py-0.5 rounded-full border" style={{ borderColor: "var(--c-border)", color: "var(--text-3)" }}>
+                +{goal!.targetPct}% / month
+              </span>
+            </div>
+            <div className="flex items-center rounded-lg overflow-hidden border text-xs" style={{ borderColor: "var(--c-border)" }}>
+              <button
+                onClick={() => setProjectionMode("actual")}
+                className={cn("px-3 py-1.5 font-medium transition-colors", projectionMode === "actual" ? "bg-indigo-600 text-white" : "hover:bg-[#1a1a1f]")}
+                style={projectionMode !== "actual" ? { color: "var(--text-3)" } : undefined}
+              >
+                Current Balance
+              </button>
+              <button
+                onClick={() => setProjectionMode("compound")}
+                className={cn("px-3 py-1.5 font-medium transition-colors border-l", projectionMode === "compound" ? "bg-indigo-600 text-white" : "hover:bg-[#1a1a1f]")}
+                style={projectionMode !== "compound" ? { color: "var(--text-3)", borderColor: "var(--c-border)" } : { borderColor: "transparent" }}
+              >
+                Pure +{goal!.targetPct}%
+              </button>
+            </div>
           </div>
           <div className="rounded-xl border overflow-hidden" style={{ borderColor: "var(--c-border)" }}>
             <div

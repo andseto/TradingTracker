@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff, AlertCircle } from "lucide-react";
 import { AnvilIcon } from "@/components/ui/AnvilIcon";
@@ -10,10 +10,19 @@ export default function LoginPage() {
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
   const [showPass, setShowPass] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [demoMode, setDemoMode] = useState(false);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("rememberedEmail");
+    if (saved) {
+      setEmail(saved);
+      setRememberMe(true);
+    }
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -45,6 +54,8 @@ export default function LoginPage() {
       } else {
         const { error: err } = await supabase.auth.signInWithPassword({ email, password });
         if (err) { setError(err.message); setLoading(false); return; }
+        if (rememberMe) localStorage.setItem("rememberedEmail", email);
+        else localStorage.removeItem("rememberedEmail");
         router.push("/dashboard");
       }
     } catch {
@@ -140,6 +151,18 @@ export default function LoginPage() {
                 </button>
               </div>
             </div>
+
+            {mode === "login" && (
+              <label className="flex items-center gap-2 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="w-3.5 h-3.5 rounded accent-indigo-500"
+                />
+                <span className="text-xs text-[#9090a8]">Remember me</span>
+              </label>
+            )}
 
             {error && (
               <div className="flex items-start gap-2 text-xs text-[#ef4444] bg-red-500/5 border border-red-500/20 rounded-lg px-3 py-2">

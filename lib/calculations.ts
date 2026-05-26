@@ -253,7 +253,12 @@ function monthRange(start: string, end: string): string[] {
   return out;
 }
 
-export function calcAllGoalMonths(allDaily: DailyPnL[], goal: Goal, futureCount = 6): GoalMonth[] {
+export function calcAllGoalMonths(
+  allDaily: DailyPnL[],
+  goal: Goal,
+  futureCount = 6,
+  projectionMode: "actual" | "compound" = "actual",
+): GoalMonth[] {
   const today = new Date().toISOString().slice(0, 10);
   const currentMonth = today.slice(0, 7);
   const endMonth = shiftMonth(currentMonth, futureCount);
@@ -261,7 +266,7 @@ export function calcAllGoalMonths(allDaily: DailyPnL[], goal: Goal, futureCount 
 
   let runningBalance = goal.startBalance;
 
-  return months.map((month) => {
+  return months.map((month, monthIndex) => {
     const monthStart = `${month}-01`;
     const nextMonthStr = shiftMonth(month, 1);
     const nextMonthStart = `${nextMonthStr}-01`;
@@ -272,7 +277,14 @@ export function calcAllGoalMonths(allDaily: DailyPnL[], goal: Goal, futureCount 
     // Per-month override lets the user pin their actual account balance for any month,
     // correcting drift caused by open positions, dividends, deposits, etc.
     const override = goal.monthBalances?.[month];
-    const startBalance = parseFloat((override !== undefined ? override : runningBalance).toFixed(2));
+    const baseStart = override !== undefined ? override : runningBalance;
+    // In compound mode, future months project as if every past month hit its target exactly.
+    const startBalance = parseFloat(
+      (status === "future" && projectionMode === "compound"
+        ? goal.startBalance * Math.pow(1 + goal.targetPct / 100, monthIndex)
+        : baseStart
+      ).toFixed(2)
+    );
     const goalAmount = parseFloat((startBalance * (1 + goal.targetPct / 100)).toFixed(2));
 
     let monthPnl: number | null = null;
