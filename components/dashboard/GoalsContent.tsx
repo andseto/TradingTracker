@@ -58,6 +58,7 @@ export function GoalsContent() {
   const defaultStart = goal ? parseYYYYMM(goal.startMonth) : { month: 4, year: CURRENT_YEAR };
 
   const [projectionMode, setProjectionMode] = useState<"actual" | "compound">("actual");
+  const [futureCount, setFutureCount] = useState(6);
   const [editing, setEditing] = useState(!isSetup);
   const [formMonth, setFormMonth] = useState(defaultStart.month);
   const [formYear, setFormYear] = useState(defaultStart.year);
@@ -90,8 +91,8 @@ export function GoalsContent() {
 
   const allMonths = useMemo(() => {
     if (!isSetup) return [];
-    return calcAllGoalMonths(allDaily, goal!, 6, projectionMode);
-  }, [allDaily, goal, isSetup, projectionMode]);
+    return calcAllGoalMonths(allDaily, goal!, futureCount, projectionMode);
+  }, [allDaily, goal, isSetup, projectionMode, futureCount]);
 
   const current = allMonths.find((m) => m.status === "current") ?? null;
   const pastMonths = allMonths.filter((m) => m.status === "past").reverse();
@@ -346,7 +347,7 @@ export function GoalsContent() {
       {/* ── Upcoming projections ── */}
       {isSetup && !editing && futureMonths.length > 0 && (
         <section>
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
             <div className="flex items-center gap-2">
               <h2 className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-3)" }}>
                 Upcoming Projections
@@ -355,6 +356,22 @@ export function GoalsContent() {
                 +{goal!.targetPct}% / month
               </span>
             </div>
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
+                <input
+                  type="number"
+                  min={1}
+                  max={120}
+                  value={futureCount}
+                  onChange={(e) => {
+                    const v = Math.max(1, Math.min(120, Number(e.target.value)));
+                    if (!isNaN(v)) setFutureCount(v);
+                  }}
+                  className="w-16 px-2 py-1 text-xs rounded-lg border focus:outline-none focus:ring-1 focus:ring-indigo-500/40 text-center"
+                  style={{ background: "var(--bg-base)", borderColor: "var(--c-border)", color: "var(--text-1)" }}
+                />
+                <span className="text-xs" style={{ color: "var(--text-3)" }}>months</span>
+              </div>
             <div className="flex items-center rounded-lg overflow-hidden border text-xs" style={{ borderColor: "var(--c-border)" }}>
               <button
                 onClick={() => setProjectionMode("actual")}
@@ -370,6 +387,7 @@ export function GoalsContent() {
               >
                 Pure +{goal!.targetPct}%
               </button>
+            </div>
             </div>
           </div>
           <div className="rounded-xl border overflow-hidden" style={{ borderColor: "var(--c-border)" }}>
