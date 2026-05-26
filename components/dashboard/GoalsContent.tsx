@@ -487,12 +487,10 @@ function CurrentMonthCard({ data, privacy, targetPct, editingMonth, editingBalan
 
       {/* Bottom row */}
       <div className="flex items-center justify-between text-xs pt-1 border-t" style={{ borderColor: "var(--c-border)", color: "var(--text-3)" }}>
-        <span>
+        <span className={cn(data.isAchieved ? "text-emerald-400" : "text-red-400")}>
           {data.isAchieved
-            ? "Goal achieved — great month!"
-            : needed > 0
-            ? `Need ${fmtc(needed, privacy)} more to hit +${targetPct}%`
-            : "On track"}
+            ? `Goal achieved — ${fmtc(data.endBalance - data.goalAmount, privacy)} above goal`
+            : `${fmtc(needed, privacy)} below goal`}
         </span>
         <span>{data.startBalance > 0 && <>Target: {fmtc(data.goalAmount, privacy)}</>}</span>
       </div>
@@ -582,6 +580,9 @@ function PastMonthRow({ data, privacy, editingMonth, editingBalanceInput, setEdi
           {achieved ? <CheckCircle2 className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
           {achieved ? "Hit" : "Missed"}
         </span>
+        <p className={cn("text-xs mt-0.5", achieved ? "text-emerald-400" : "text-red-400")}>
+          {achieved ? "+" : "-"}{fmtc(Math.abs(data.endBalance - data.goalAmount), privacy)}
+        </p>
       </div>
     </div>
   );
