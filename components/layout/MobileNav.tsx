@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Upload, BarChart2, Target, BookOpen } from "lucide-react";
+import { LayoutDashboard, Upload, BarChart2, Target, BookOpen, Home } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
   { href: "/dashboard/charts", icon: BarChart2, label: "Charts" },
   { href: "/dashboard/goals", icon: Target, label: "Goals" },
+  { href: "/dashboard/house", icon: Home, label: "House" },
   { href: "/dashboard/journal", icon: BookOpen, label: "Journal" },
   { href: "/dashboard/import", icon: Upload, label: "Import" },
 ];

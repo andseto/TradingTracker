@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import Link from "next/link";
 import {
   Target, CheckCircle2, XCircle, Edit2, Save, X,
-  Clock, ChevronRight, Pin,
+  Clock, ChevronRight, Pin, Home,
 } from "lucide-react";
 import { useDashboard } from "@/context/DashboardContext";
 import { calcAllGoalMonths, GoalMonth } from "@/lib/calculations";
@@ -146,14 +147,24 @@ export function GoalsContent() {
           )}
         </div>
         {isSetup && !editing && (
-          <button
-            onClick={handleEdit}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors hover:bg-[#1a1a1f]"
-            style={{ borderColor: "var(--c-border)", color: "var(--text-2)" }}
-          >
-            <Edit2 className="w-3 h-3" />
-            Edit Goal
-          </button>
+          <div className="flex items-center gap-2">
+            <Link
+              href="/dashboard/house"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors hover:bg-[#1a1a1f]"
+              style={{ borderColor: "var(--c-border)", color: "var(--text-2)" }}
+            >
+              <Home className="w-3 h-3" />
+              Build a House
+            </Link>
+            <button
+              onClick={handleEdit}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors hover:bg-[#1a1a1f]"
+              style={{ borderColor: "var(--c-border)", color: "var(--text-2)" }}
+            >
+              <Edit2 className="w-3 h-3" />
+              Edit Goal
+            </button>
+          </div>
         )}
       </div>
 
