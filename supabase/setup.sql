@@ -24,9 +24,13 @@ create table if not exists public.expenses (
   notes        text,
   receipt_path text,
   receipt_name text,
+  winning_days smallint,
   created_at   timestamptz not null default now()
 );
 create index if not exists expenses_user_date_idx on public.expenses (user_id, date desc);
+
+-- Migration for tables created before winning_days existed. Safe to re-run.
+alter table public.expenses add column if not exists winning_days smallint;
 
 -- ---------- Payouts (gross profit) ----------
 create table if not exists public.payouts (

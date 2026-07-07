@@ -13,7 +13,7 @@ import {
   insertExpense, updateExpense, deleteExpense, uploadReceipt, removeReceipt,
 } from "@/lib/business";
 import { exportExpensesToExcel } from "@/lib/export";
-import { WinStreak } from "@/components/business/WinStreak";
+import { DotSelector } from "@/components/ui/DotSelector";
 import { FIRMS, EXPENSE_TYPES, OUTCOMES, type Expense, type ExpenseInput } from "@/types";
 import { fmtMoneyFull, fmtDate, todayISO } from "@/lib/utils";
 
@@ -25,6 +25,7 @@ interface FormState {
   outcome: string;
   amount: string;
   notes: string;
+  winningDays: number;
 }
 
 const emptyForm = (): FormState => ({
@@ -35,6 +36,7 @@ const emptyForm = (): FormState => ({
   outcome: "In Progress",
   amount: "",
   notes: "",
+  winningDays: 0,
 });
 
 function formFromExpense(e: Expense): FormState {
@@ -47,8 +49,11 @@ function formFromExpense(e: Expense): FormState {
     outcome: e.outcome ?? "",
     amount: String(e.amount),
     notes: e.notes ?? "",
+    winningDays: e.winning_days ?? 0,
   };
 }
+
+const WINNING_DAYS_OUTCOMES = new Set(["Passed", "Payout Received"]);
 
 export function ExpensesContent() {
   const { userId, expenses, refresh, tablesMissing } = useBusiness();
@@ -136,6 +141,7 @@ export function ExpensesContent() {
         notes: form.notes.trim() || null,
         receipt_path,
         receipt_name,
+        winning_days: WINNING_DAYS_OUTCOMES.has(form.outcome) && form.winningDays > 0 ? form.winningDays : null,
       };
 
       if (editing) await updateExpense(editing.id, input);
@@ -174,8 +180,6 @@ export function ExpensesContent() {
 
   return (
     <div className="space-y-4">
-      <WinStreak />
-
       {/* Toolbar */}
       <div className="flex flex-wrap items-center gap-2">
         <SelectInput
@@ -233,6 +237,7 @@ export function ExpensesContent() {
                 <th className="px-4 py-3 font-medium">Firm</th>
                 <th className="px-4 py-3 font-medium">Type</th>
                 <th className="px-4 py-3 font-medium">Outcome</th>
+                <th className="px-4 py-3 font-medium">Winning Days</th>
                 <th className="px-4 py-3 font-medium text-right">Amount</th>
                 <th className="px-4 py-3 font-medium">Receipt</th>
                 <th className="px-4 py-3 font-medium">Notes</th>
@@ -242,7 +247,7 @@ export function ExpensesContent() {
             <tbody>
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={8} className="px-4 py-10 text-center text-xs" style={{ color: "var(--text-3)" }}>
+                  <td colSpan={9} className="px-4 py-10 text-center text-xs" style={{ color: "var(--text-3)" }}>
                     {expenses.length === 0
                       ? "No expenses yet. Log your first eval purchase."
                       : "Nothing matches these filters."}
@@ -257,6 +262,9 @@ export function ExpensesContent() {
                   <td className="px-4 py-2.5" style={{ color: "var(--text-1)" }}>{e.firm}</td>
                   <td className="px-4 py-2.5" style={{ color: "var(--text-2)" }}>{e.expense_type}</td>
                   <td className="px-4 py-2.5">{e.outcome ? <Badge value={e.outcome} /> : <span style={{ color: "var(--text-3)" }}>—</span>}</td>
+                  <td className="px-4 py-2.5">
+                    {e.winning_days ? <DotSelector value={e.winning_days} readOnly /> : <span style={{ color: "var(--text-3)" }}>—</span>}
+                  </td>
                   <td className="px-4 py-2.5 text-right font-mono text-red-400 whitespace-nowrap">
                     −{fmtMoneyFull(Number(e.amount))}
                   </td>
@@ -313,6 +321,17 @@ export function ExpensesContent() {
               <SelectInput options={OUTCOMES} placeholder="—" value={form.outcome} onChange={(e) => setForm({ ...form, outcome: e.target.value })} />
             </Field>
           </div>
+
+          {WINNING_DAYS_OUTCOMES.has(form.outcome) && (
+            <Field label="Winning days before payout">
+              <div className="flex items-center gap-3">
+                <DotSelector value={form.winningDays} onChange={(v) => setForm({ ...form, winningDays: v })} />
+                <span className="text-xs font-mono" style={{ color: "var(--text-3)" }}>
+                  {form.winningDays > 0 ? `${form.winningDays}/5` : "not set"}
+                </span>
+              </div>
+            </Field>
+          )}
 
           <Field label="Notes">
             <TextArea rows={2} placeholder="Account size, promo code, anything worth remembering…" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />

@@ -18,6 +18,7 @@ export interface Expense {
   notes: string | null;
   receipt_path: string | null;
   receipt_name: string | null;
+  winning_days: number | null; // 1-5 dot rating: winning days logged before this account passed/paid out
   created_at: string;
 }
 
