@@ -6,7 +6,7 @@ import { useBusiness } from "@/context/BusinessContext";
 import { Card } from "@/components/ui/Card";
 import { Field, TextInput } from "@/components/ui/fields";
 import { saveSettings } from "@/lib/business";
-import { fmtMoneyFull } from "@/lib/utils";
+import { fmtMoneyFull, toErrorMessage } from "@/lib/utils";
 
 export function SettingsContent() {
   const { userId, settings, refresh, tablesMissing } = useBusiness();
@@ -33,7 +33,7 @@ export function SettingsContent() {
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save settings.");
+      setError(toErrorMessage(err, "Failed to save settings."));
     } finally {
       setSaving(false);
     }

@@ -13,7 +13,7 @@ import {
   insertPayout, updatePayout, deletePayout, uploadReceipt, removeReceipt,
 } from "@/lib/business";
 import { FIRMS, PAYOUT_METHODS, PAYOUT_STATUSES, type Payout, type PayoutInput } from "@/types";
-import { fmtMoneyFull, fmtDate, todayISO } from "@/lib/utils";
+import { fmtMoneyFull, fmtDate, todayISO, toErrorMessage } from "@/lib/utils";
 
 interface FormState {
   date: string;
@@ -135,7 +135,7 @@ export function PayoutsContent() {
       await refresh();
       setModalOpen(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save payout.");
+      setError(toErrorMessage(err, "Failed to save payout."));
     } finally {
       setSaving(false);
     }

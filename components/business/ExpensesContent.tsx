@@ -15,7 +15,7 @@ import {
 import { exportExpensesToExcel } from "@/lib/export";
 import { DotSelector } from "@/components/ui/DotSelector";
 import { FIRMS, EXPENSE_TYPES, OUTCOMES, type Expense, type ExpenseInput } from "@/types";
-import { fmtMoneyFull, fmtDate, todayISO } from "@/lib/utils";
+import { fmtMoneyFull, fmtDate, todayISO, toErrorMessage } from "@/lib/utils";
 
 interface FormState {
   date: string;
@@ -150,7 +150,7 @@ export function ExpensesContent() {
       await refresh();
       setModalOpen(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save expense.");
+      setError(toErrorMessage(err, "Failed to save expense."));
     } finally {
       setSaving(false);
     }
