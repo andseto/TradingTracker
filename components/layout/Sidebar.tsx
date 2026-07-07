@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard, Receipt, Banknote, FileText, Settings,
-  ChevronLeft, ChevronRight, CandlestickChart,
+  ChevronLeft, ChevronRight, CandlestickChart, CalendarDays,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -12,6 +12,7 @@ const navItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Overview" },
   { href: "/dashboard/expenses", icon: Receipt, label: "Expenses" },
   { href: "/dashboard/payouts", icon: Banknote, label: "Payouts" },
+  { href: "/dashboard/calendar", icon: CalendarDays, label: "Calendar" },
   { href: "/dashboard/receipts", icon: FileText, label: "Receipts" },
   { href: "/dashboard/settings", icon: Settings, label: "Settings" },
 ];

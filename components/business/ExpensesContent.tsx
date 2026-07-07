@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Plus, Pencil, Trash2, Loader2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Loader2, FileSpreadsheet } from "lucide-react";
 import { useBusiness } from "@/context/BusinessContext";
 import { Card } from "@/components/ui/Card";
 import { Modal } from "@/components/ui/Modal";
@@ -12,6 +12,7 @@ import { Field, TextInput, TextArea, SelectInput } from "@/components/ui/fields"
 import {
   insertExpense, updateExpense, deleteExpense, uploadReceipt, removeReceipt,
 } from "@/lib/business";
+import { exportExpensesToExcel } from "@/lib/export";
 import { FIRMS, EXPENSE_TYPES, OUTCOMES, type Expense, type ExpenseInput } from "@/types";
 import { fmtMoneyFull, fmtDate, todayISO } from "@/lib/utils";
 
@@ -60,6 +61,7 @@ export function ExpensesContent() {
   const [error, setError] = useState("");
   const [confirmDelete, setConfirmDelete] = useState<Expense | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [exporting, setExporting] = useState(false);
 
   // Filters
   const [filterFirm, setFilterFirm] = useState("");
@@ -147,6 +149,16 @@ export function ExpensesContent() {
     }
   }
 
+  async function handleExport() {
+    if (exporting || filtered.length === 0) return;
+    setExporting(true);
+    try {
+      await exportExpensesToExcel(filtered);
+    } finally {
+      setExporting(false);
+    }
+  }
+
   async function handleDelete() {
     if (!confirmDelete) return;
     setDeleting(true);
@@ -188,6 +200,15 @@ export function ExpensesContent() {
           <span className="text-xs font-mono" style={{ color: "var(--text-2)" }}>
             {filtered.length} · {fmtMoneyFull(filteredTotal)}
           </span>
+          <button
+            onClick={handleExport}
+            disabled={exporting || filtered.length === 0}
+            title="Download the rows below (respects filters) as an Excel file"
+            className="flex items-center gap-1.5 border border-[#2a2a35] text-[#9090a8] hover:text-[#e8e8f0] hover:border-[#3a3a48] disabled:opacity-50 text-xs font-medium rounded-lg px-3 py-2 transition-colors"
+          >
+            {exporting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileSpreadsheet className="w-3.5 h-3.5" />}
+            Export Excel
+          </button>
           <button
             onClick={openAdd}
             disabled={tablesMissing}
