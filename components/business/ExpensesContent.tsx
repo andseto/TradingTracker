@@ -13,6 +13,7 @@ import {
   insertExpense, updateExpense, deleteExpense, uploadReceipt, removeReceipt,
 } from "@/lib/business";
 import { exportExpensesToExcel } from "@/lib/export";
+import { WinStreak } from "@/components/business/WinStreak";
 import { FIRMS, EXPENSE_TYPES, OUTCOMES, type Expense, type ExpenseInput } from "@/types";
 import { fmtMoneyFull, fmtDate, todayISO } from "@/lib/utils";
 
@@ -173,6 +174,8 @@ export function ExpensesContent() {
 
   return (
     <div className="space-y-4">
+      <WinStreak />
+
       {/* Toolbar */}
       <div className="flex flex-wrap items-center gap-2">
         <SelectInput
