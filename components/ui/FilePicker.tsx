@@ -25,7 +25,7 @@ export function FilePicker({ file, existingName, onChange, onRemoveExisting }: F
       />
       {file ? (
         <div className="flex items-center gap-2 bg-[#0d0d0f] border border-[#2a2a35] rounded-lg px-3 py-2 text-sm text-[#e8e8f0]">
-          <Paperclip className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+          <Paperclip className="w-3.5 h-3.5 text-amber-400 shrink-0" />
           <span className="truncate flex-1 text-xs">{file.name}</span>
           <button type="button" onClick={() => { onChange(null); if (inputRef.current) inputRef.current.value = ""; }} className="text-[#55556a] hover:text-[#e8e8f0]">
             <X className="w-3.5 h-3.5" />
@@ -33,9 +33,9 @@ export function FilePicker({ file, existingName, onChange, onRemoveExisting }: F
         </div>
       ) : existingName ? (
         <div className="flex items-center gap-2 bg-[#0d0d0f] border border-[#2a2a35] rounded-lg px-3 py-2 text-sm">
-          <Paperclip className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+          <Paperclip className="w-3.5 h-3.5 text-amber-400 shrink-0" />
           <span className="truncate flex-1 text-xs text-[#9090a8]">{existingName}</span>
-          <button type="button" onClick={() => inputRef.current?.click()} className="text-xs text-indigo-400 hover:text-indigo-300 shrink-0">
+          <button type="button" onClick={() => inputRef.current?.click()} className="text-xs text-amber-400 hover:text-amber-300 shrink-0">
             Replace
           </button>
           {onRemoveExisting && (
@@ -48,7 +48,7 @@ export function FilePicker({ file, existingName, onChange, onRemoveExisting }: F
         <button
           type="button"
           onClick={() => inputRef.current?.click()}
-          className="w-full flex items-center justify-center gap-2 bg-[#0d0d0f] border border-dashed border-[#2a2a35] hover:border-indigo-500/50 rounded-lg px-3 py-2 text-xs text-[#9090a8] hover:text-[#e8e8f0] transition-colors"
+          className="w-full flex items-center justify-center gap-2 bg-[#0d0d0f] border border-dashed border-[#2a2a35] hover:border-amber-500/50 rounded-lg px-3 py-2 text-xs text-[#9090a8] hover:text-[#e8e8f0] transition-colors"
         >
           <Paperclip className="w-3.5 h-3.5" />
           Attach receipt (PDF or image)

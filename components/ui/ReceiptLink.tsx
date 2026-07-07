@@ -25,7 +25,7 @@ export function ReceiptLink({ path, name }: { path: string; name?: string | null
     <button
       onClick={open}
       title={name ?? "View receipt"}
-      className="inline-flex items-center gap-1 text-xs text-indigo-400 hover:text-indigo-300 transition-colors"
+      className="inline-flex items-center gap-1 text-xs text-amber-400 hover:text-amber-300 transition-colors"
     >
       {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileText className="w-3.5 h-3.5" />}
       <span className="hidden lg:inline">View</span>

@@ -113,7 +113,7 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
         <div className="flex flex-col items-center gap-3">
           <div
             className="w-8 h-8 border-2 rounded-full animate-spin"
-            style={{ borderColor: "var(--c-border)", borderTopColor: "#6366f1" }}
+            style={{ borderColor: "var(--c-border)", borderTopColor: "#f59e0b" }}
           />
           <p className="text-sm" style={{ color: "var(--text-3)" }}>Loading SetoTrading…</p>
         </div>

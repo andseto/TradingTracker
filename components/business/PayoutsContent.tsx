@@ -178,7 +178,7 @@ export function PayoutsContent() {
           <button
             onClick={openAdd}
             disabled={tablesMissing}
-            className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-xs font-medium rounded-lg px-3 py-2 transition-colors"
+            className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-neutral-900 text-xs font-medium rounded-lg px-3 py-2 transition-colors"
           >
             <Plus className="w-3.5 h-3.5" />
             Log Payout
@@ -230,7 +230,7 @@ export function PayoutsContent() {
                     {p.notes ?? ""}
                   </td>
                   <td className="px-4 py-2.5 whitespace-nowrap text-right">
-                    <button onClick={() => openEdit(p)} className="text-[#55556a] hover:text-indigo-400 p-1 transition-colors" title="Edit">
+                    <button onClick={() => openEdit(p)} className="text-[#55556a] hover:text-amber-400 p-1 transition-colors" title="Edit">
                       <Pencil className="w-3.5 h-3.5" />
                     </button>
                     <button onClick={() => setConfirmDelete(p)} className="text-[#55556a] hover:text-red-400 p-1 transition-colors" title="Delete">
@@ -296,7 +296,7 @@ export function PayoutsContent() {
             <button type="button" onClick={() => setModalOpen(false)} className="text-xs font-medium border border-[#2a2a35] text-[#9090a8] hover:text-[#e8e8f0] rounded-lg px-3 py-2 transition-colors">
               Cancel
             </button>
-            <button type="submit" disabled={saving} className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-xs font-medium rounded-lg px-4 py-2 transition-colors">
+            <button type="submit" disabled={saving} className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-neutral-900 text-xs font-medium rounded-lg px-4 py-2 transition-colors">
               {saving && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
               {editing ? "Save Changes" : "Log Payout"}
             </button>

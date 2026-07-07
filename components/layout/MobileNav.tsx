@@ -29,7 +29,7 @@ export function MobileNav() {
             href={href}
             className={cn(
               "flex-1 flex flex-col items-center gap-0.5 py-2 text-[10px] font-medium transition-colors",
-              active ? "text-indigo-400" : "text-[#55556a] hover:text-[#9090a8]"
+              active ? "text-amber-400" : "text-[#55556a] hover:text-[#9090a8]"
             )}
           >
             <Icon className="w-4 h-4" />

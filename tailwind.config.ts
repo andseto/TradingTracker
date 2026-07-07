@@ -26,9 +26,9 @@ const config: Config = {
           muted: "#55556a",
         },
         accent: {
-          DEFAULT: "#6366f1",
-          dim: "#4f46e5",
-          muted: "#312e81",
+          DEFAULT: "#f59e0b",
+          dim: "#d97706",
+          muted: "#78350f",
         },
       },
       fontFamily: {

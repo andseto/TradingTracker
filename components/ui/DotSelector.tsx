@@ -19,7 +19,7 @@ export function DotSelector({ value, max = 5, onChange, readOnly }: DotSelectorP
         {dots.map((n) => (
           <span
             key={n}
-            className={cn("w-2 h-2 rounded-full", n <= value ? "bg-indigo-500" : "bg-[#2a2a35]")}
+            className={cn("w-2 h-2 rounded-full", n <= value ? "bg-amber-500" : "bg-[#2a2a35]")}
           />
         ))}
       </div>
@@ -37,8 +37,8 @@ export function DotSelector({ value, max = 5, onChange, readOnly }: DotSelectorP
           className={cn(
             "w-4 h-4 rounded-full border transition-colors",
             n <= value
-              ? "bg-indigo-500 border-indigo-500"
-              : "border-[#3a3a48] hover:border-indigo-400"
+              ? "bg-amber-500 border-amber-500"
+              : "border-[#3a3a48] hover:border-amber-400"
           )}
         />
       ))}

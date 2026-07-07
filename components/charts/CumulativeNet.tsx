@@ -25,7 +25,7 @@ export function CumulativeNet({ data }: { data: CumulativePoint[] }) {
           type="monotone"
           dataKey="cumulative"
           name="Net profit to date"
-          stroke="#6366f1"
+          stroke="#f59e0b"
           strokeWidth={2}
           dot={false}
           activeDot={{ r: 4, stroke: "var(--bg-surface)", strokeWidth: 2 }}

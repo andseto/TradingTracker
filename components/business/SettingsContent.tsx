@@ -64,7 +64,7 @@ export function SettingsContent() {
             <button
               type="submit"
               disabled={saving || tablesMissing}
-              className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-xs font-medium rounded-lg px-4 py-2 transition-colors"
+              className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-neutral-900 text-xs font-medium rounded-lg px-4 py-2 transition-colors"
             >
               {saving && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
               Save Settings

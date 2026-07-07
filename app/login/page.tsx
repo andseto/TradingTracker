@@ -58,20 +58,20 @@ export default function LoginPage() {
       <div
         className="absolute inset-0 opacity-[0.03]"
         style={{
-          backgroundImage: "linear-gradient(#6366f1 1px, transparent 1px), linear-gradient(90deg, #6366f1 1px, transparent 1px)",
+          backgroundImage: "linear-gradient(#f59e0b 1px, transparent 1px), linear-gradient(90deg, #f59e0b 1px, transparent 1px)",
           backgroundSize: "40px 40px",
         }}
       />
       {/* Glow blobs */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-600/5 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-600/5 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-amber-600/5 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-orange-500/5 rounded-full blur-3xl pointer-events-none" />
 
       <div className="relative w-full max-w-md px-4">
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 rounded-xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center">
-              <CandlestickChart className="w-6 h-6 text-indigo-400" />
+            <div className="w-10 h-10 rounded-xl bg-amber-600/20 border border-amber-500/30 flex items-center justify-center">
+              <CandlestickChart className="w-6 h-6 text-amber-400" />
             </div>
             <span className="text-2xl font-bold tracking-tight text-white">SetoTrading</span>
           </div>
@@ -108,7 +108,7 @@ export default function LoginPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
                 required
-                className="w-full bg-[#0d0d0f] border border-[#2a2a35] rounded-lg px-3 py-2.5 text-sm text-[#e8e8f0] placeholder:text-[#55556a] focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/30 transition"
+                className="w-full bg-[#0d0d0f] border border-[#2a2a35] rounded-lg px-3 py-2.5 text-sm text-[#e8e8f0] placeholder:text-[#55556a] focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/30 transition"
               />
             </div>
 
@@ -123,7 +123,7 @@ export default function LoginPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
                   required
-                  className="w-full bg-[#0d0d0f] border border-[#2a2a35] rounded-lg px-3 py-2.5 pr-10 text-sm text-[#e8e8f0] placeholder:text-[#55556a] focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/30 transition"
+                  className="w-full bg-[#0d0d0f] border border-[#2a2a35] rounded-lg px-3 py-2.5 pr-10 text-sm text-[#e8e8f0] placeholder:text-[#55556a] focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/30 transition"
                 />
                 <button
                   type="button"
@@ -141,7 +141,7 @@ export default function LoginPage() {
                   type="checkbox"
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
-                  className="w-3.5 h-3.5 rounded accent-indigo-500"
+                  className="w-3.5 h-3.5 rounded accent-amber-500"
                 />
                 <span className="text-xs text-[#9090a8]">Remember me</span>
               </label>
@@ -163,7 +163,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium py-2.5 rounded-lg text-sm transition-colors"
+              className="w-full bg-amber-500 hover:bg-amber-400 disabled:opacity-50 disabled:cursor-not-allowed text-neutral-900 font-medium py-2.5 rounded-lg text-sm transition-colors"
             >
               {loading ? "Signing in..." : mode === "login" ? "Sign In" : "Create Account"}
             </button>

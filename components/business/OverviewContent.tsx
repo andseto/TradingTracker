@@ -29,7 +29,7 @@ function MeterList({ rows }: { rows: { label: string; amount: number; share: num
           </div>
           <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "var(--bg-elevated)" }}>
             <div
-              className="h-full rounded-full bg-indigo-500"
+              className="h-full rounded-full bg-amber-500"
               style={{ width: `${Math.max(r.share * 100, 2)}%` }}
             />
           </div>
@@ -130,7 +130,7 @@ export function OverviewContent() {
             <div className="flex items-center justify-center gap-2">
               <Link
                 href="/dashboard/expenses"
-                className="text-xs font-medium bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg px-3 py-2 transition-colors"
+                className="text-xs font-medium bg-amber-500 hover:bg-amber-400 text-neutral-900 rounded-lg px-3 py-2 transition-colors"
               >
                 Log an expense
               </Link>
@@ -181,7 +181,7 @@ export function OverviewContent() {
               <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs" style={{ color: "var(--text-2)" }}>
                 <span>Passed: <span className="font-mono text-green-400">{evals.passed}</span></span>
                 <span>Failed: <span className="font-mono text-red-400">{evals.failed}</span></span>
-                <span>In progress: <span className="font-mono text-indigo-400">{evals.inProgress}</span></span>
+                <span>In progress: <span className="font-mono text-sky-400">{evals.inProgress}</span></span>
               </div>
             </Card>
           </div>

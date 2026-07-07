@@ -3,7 +3,7 @@
 import { cn } from "@/lib/utils";
 
 const inputClass =
-  "w-full bg-[#0d0d0f] border border-[#2a2a35] rounded-lg px-3 py-2 text-sm text-[#e8e8f0] placeholder:text-[#55556a] focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/30 transition";
+  "w-full bg-[#0d0d0f] border border-[#2a2a35] rounded-lg px-3 py-2 text-sm text-[#e8e8f0] placeholder:text-[#55556a] focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/30 transition";
 
 export function Field({ label, children, className }: { label: string; children: React.ReactNode; className?: string }) {
   return (

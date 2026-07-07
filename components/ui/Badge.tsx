@@ -8,7 +8,7 @@ const tones: Record<string, string> = {
   "Payout Received": "bg-green-500/10 text-green-400 border-green-500/25",
   "Received": "bg-green-500/10 text-green-400 border-green-500/25",
   "Failed": "bg-red-500/10 text-red-400 border-red-500/25",
-  "In Progress": "bg-indigo-500/10 text-indigo-400 border-indigo-500/25",
+  "In Progress": "bg-sky-500/10 text-sky-400 border-sky-500/25",
   "Pending": "bg-amber-500/10 text-amber-400 border-amber-500/25",
   "Refunded": "bg-slate-500/10 text-slate-400 border-slate-500/25",
 };
