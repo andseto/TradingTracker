@@ -2,16 +2,15 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Upload, BarChart2, Target, BookOpen, Home } from "lucide-react";
+import { LayoutDashboard, Receipt, Banknote, FileText, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
-  { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-  { href: "/dashboard/charts", icon: BarChart2, label: "Charts" },
-  { href: "/dashboard/goals", icon: Target, label: "Goals" },
-  { href: "/dashboard/house", icon: Home, label: "House" },
-  { href: "/dashboard/journal", icon: BookOpen, label: "Journal" },
-  { href: "/dashboard/import", icon: Upload, label: "Import" },
+  { href: "/dashboard", icon: LayoutDashboard, label: "Overview" },
+  { href: "/dashboard/expenses", icon: Receipt, label: "Expenses" },
+  { href: "/dashboard/payouts", icon: Banknote, label: "Payouts" },
+  { href: "/dashboard/receipts", icon: FileText, label: "Receipts" },
+  { href: "/dashboard/settings", icon: Settings, label: "Settings" },
 ];
 
 export function MobileNav() {
@@ -19,7 +18,7 @@ export function MobileNav() {
 
   return (
     <nav
-      className="md:hidden fixed bottom-0 left-0 right-0 z-50 flex items-center border-t"
+      className="md:hidden fixed bottom-0 inset-x-0 border-t flex items-stretch z-40"
       style={{ background: "var(--bg-surface)", borderColor: "var(--c-border)" }}
     >
       {navItems.map(({ href, icon: Icon, label }) => {
@@ -29,11 +28,11 @@ export function MobileNav() {
             key={href}
             href={href}
             className={cn(
-              "flex-1 flex flex-col items-center gap-1 py-2.5 text-[10px] font-medium transition-colors",
-              active ? "text-indigo-400" : "text-[#55556a]"
+              "flex-1 flex flex-col items-center gap-0.5 py-2 text-[10px] font-medium transition-colors",
+              active ? "text-indigo-400" : "text-[#55556a] hover:text-[#9090a8]"
             )}
           >
-            <Icon className={cn("w-5 h-5", active ? "text-indigo-400" : "text-[#55556a]")} />
+            <Icon className="w-4 h-4" />
             {label}
           </Link>
         );

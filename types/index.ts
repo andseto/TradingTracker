@@ -1,98 +1,97 @@
-export interface Trade {
+// ---------- Domain types for the SetoTrading business dashboard ----------
+
+export interface BusinessSettings {
+  user_id: string;
+  business_name: string;
+  seed_money: number;
+  updated_at: string;
+}
+
+export interface Expense {
   id: string;
-  date: string; // YYYY-MM-DD
-  symbol: string;
-  action: "BUY" | "SELL";
-  quantity: number;
-  price: number;
-  amount: number; // net cash flow (negative for buys)
-  commission: number;
+  user_id: string;
+  date: string; // yyyy-mm-dd
+  firm: string;
+  expense_type: string;
+  outcome: string | null;
+  amount: number;
+  notes: string | null;
+  receipt_path: string | null;
+  receipt_name: string | null;
+  created_at: string;
 }
 
-export interface ClosedPosition {
+export interface Payout {
   id: string;
-  symbol: string;
-  openDate: string;
-  closeDate: string;
-  quantity: number;
-  entryPrice: number;
-  exitPrice: number;
-  pnl: number;
-  pnlPct: number;
-  isWin: boolean;
+  user_id: string;
+  date: string; // yyyy-mm-dd
+  firm: string;
+  amount: number;
+  method: string | null;
+  status: string;
+  notes: string | null;
+  receipt_path: string | null;
+  receipt_name: string | null;
+  created_at: string;
 }
 
-export interface DailyPnL {
+export type ExpenseInput = Omit<Expense, "id" | "user_id" | "created_at">;
+export type PayoutInput = Omit<Payout, "id" | "user_id" | "created_at">;
+
+// A receipt document attached to either an expense or a payout.
+export interface ReceiptDoc {
+  source: "expense" | "payout";
+  rowId: string;
   date: string;
-  pnl: number;
-  trades: number;
-  isWin: boolean;
-  isBreakEven?: boolean;
+  firm: string;
+  label: string; // expense type or "Payout"
+  amount: number;
+  path: string;
+  name: string;
 }
 
-export type DayTag = 'win' | 'loss' | 'breakeven' | 'void';
+// ---------- Dropdown option sets ----------
 
-export interface MonthlyPnL {
-  month: string; // YYYY-MM
-  label: string; // "Jan 24"
-  pnl: number;
-  trades: number;
-  winRate: number;
-}
+export const FIRMS = [
+  "Apex Trader Funding",
+  "Topstep",
+  "My Funded Futures",
+  "Take Profit Trader",
+  "Tradeify",
+  "Bulenox",
+  "FundedNext Futures",
+  "TradeDay",
+  "Legends Trading",
+  "Other",
+] as const;
 
-export interface SymbolPnL {
-  symbol: string;
-  pnl: number;
-  trades: number;
-  winRate: number;
-  totalVolume: number;
-}
+export const EXPENSE_TYPES = [
+  "Evaluation",
+  "Activation Fee",
+  "Reset",
+  "Data Fees",
+  "Software / Tools",
+  "Education",
+  "Commissions",
+  "Other",
+] as const;
 
-export interface EquityPoint {
-  date: string;
-  cumPnl: number;
-  dailyPnl: number;
-}
+export const OUTCOMES = [
+  "In Progress",
+  "Passed",
+  "Failed",
+  "Payout Received",
+  "Refunded",
+] as const;
 
-export interface Stats {
-  totalPnl: number;
-  totalPnlPct: number;
-  winRate: number;
-  profitFactor: number;
-  totalTrades: number;
-  avgWin: number;
-  avgLoss: number;
-  bestDay: number;
-  worstDay: number;
-  tradingDays: number;
-  winDays: number;
-  lossDays: number;
-}
+export const PAYOUT_METHODS = [
+  "Wire",
+  "ACH",
+  "PayPal",
+  "Wise",
+  "Crypto",
+  "Check",
+  "Other",
+] as const;
 
-export type Theme = "dark" | "light";
-
-export interface Settings {
-  theme: Theme;
-  privacyMode: boolean;
-  userName: string;
-}
-
-export interface Goal {
-  targetPct: number;
-  startMonth: string;   // YYYY-MM
-  startBalance: number; // account balance at the start of startMonth
-  monthBalances?: Record<string, number>; // YYYY-MM → actual starting balance override
-}
-
-export interface TimeRange {
-  label: string;
-  value: string;
-  days: number | null;
-}
-
-export interface JournalEntry {
-  date: string;
-  notes: string;
-  rating: number | null; // 1–5
-  tags: string[];
-}
+export const PAYOUT_STATUSES = ["Received", "Pending"] as const;

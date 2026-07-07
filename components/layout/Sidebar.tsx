@@ -3,19 +3,17 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  LayoutDashboard, Upload, ChevronLeft,
-  ChevronRight, BarChart2, Target, BookOpen, Home
+  LayoutDashboard, Receipt, Banknote, FileText, Settings,
+  ChevronLeft, ChevronRight, CandlestickChart,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { AnvilIcon } from "@/components/ui/AnvilIcon";
 
 const navItems = [
-  { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-  { href: "/dashboard/charts", icon: BarChart2, label: "Charts" },
-  { href: "/dashboard/goals", icon: Target, label: "Goals" },
-  { href: "/dashboard/house", icon: Home, label: "Build a House" },
-  { href: "/dashboard/journal", icon: BookOpen, label: "Journal" },
-  { href: "/dashboard/import", icon: Upload, label: "Import CSV" },
+  { href: "/dashboard", icon: LayoutDashboard, label: "Overview" },
+  { href: "/dashboard/expenses", icon: Receipt, label: "Expenses" },
+  { href: "/dashboard/payouts", icon: Banknote, label: "Payouts" },
+  { href: "/dashboard/receipts", icon: FileText, label: "Receipts" },
+  { href: "/dashboard/settings", icon: Settings, label: "Settings" },
 ];
 
 interface SidebarProps {
@@ -34,10 +32,10 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
       {/* Logo */}
       <div className={cn("flex items-center h-14 px-3 border-b shrink-0", collapsed ? "justify-center" : "gap-2.5 px-4")} style={{ borderColor: "var(--c-border)" }}>
         <div className="w-7 h-7 rounded-lg bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center shrink-0">
-          <AnvilIcon className="w-4 h-4 text-indigo-400" />
+          <CandlestickChart className="w-4 h-4 text-indigo-400" />
         </div>
         {!collapsed && (
-          <span className="font-bold text-sm tracking-tight text-white truncate">TradeForge</span>
+          <span className="font-bold text-sm tracking-tight text-white truncate">SetoTrading</span>
         )}
       </div>
 

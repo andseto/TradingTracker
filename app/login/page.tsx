@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff, AlertCircle } from "lucide-react";
-import { AnvilIcon } from "@/components/ui/AnvilIcon";
+import { Eye, EyeOff, AlertCircle, CandlestickChart } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -13,8 +13,8 @@ export default function LoginPage() {
   const [rememberMe, setRememberMe] = useState(false);
   const [showPass, setShowPass] = useState(false);
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
   const [loading, setLoading] = useState(false);
-  const [demoMode, setDemoMode] = useState(false);
 
   useEffect(() => {
     const saved = localStorage.getItem("rememberedEmail");
@@ -27,46 +27,29 @@ export default function LoginPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
+    setNotice("");
     setLoading(true);
 
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const hasSupabase = supabaseUrl && supabaseUrl !== "https://placeholder.supabase.co";
-
-    if (!hasSupabase) {
-      // No Supabase configured — allow demo login
-      setTimeout(() => {
-        setLoading(false);
-        router.push("/dashboard");
-      }, 600);
-      return;
-    }
-
     try {
-      const { createClient } = await import("@/lib/supabase/client");
       const supabase = createClient();
 
       if (mode === "signup") {
         const { error: err } = await supabase.auth.signUp({ email, password });
         if (err) { setError(err.message); setLoading(false); return; }
-        setError("Check your email to confirm your account.");
+        setNotice("Check your email to confirm your account, then sign in.");
         setLoading(false);
         return;
-      } else {
-        const { error: err } = await supabase.auth.signInWithPassword({ email, password });
-        if (err) { setError(err.message); setLoading(false); return; }
-        if (rememberMe) localStorage.setItem("rememberedEmail", email);
-        else localStorage.removeItem("rememberedEmail");
-        router.push("/dashboard");
       }
+
+      const { error: err } = await supabase.auth.signInWithPassword({ email, password });
+      if (err) { setError(err.message); setLoading(false); return; }
+      if (rememberMe) localStorage.setItem("rememberedEmail", email);
+      else localStorage.removeItem("rememberedEmail");
+      router.push("/dashboard");
     } catch {
       setError("Authentication error. Check your Supabase configuration.");
       setLoading(false);
     }
-  }
-
-  function handleDemo() {
-    setDemoMode(true);
-    setTimeout(() => router.push("/dashboard"), 400);
   }
 
   return (
@@ -88,11 +71,11 @@ export default function LoginPage() {
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-3 mb-3">
             <div className="w-10 h-10 rounded-xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center">
-              <AnvilIcon className="w-6 h-6 text-indigo-400" />
+              <CandlestickChart className="w-6 h-6 text-indigo-400" />
             </div>
-            <span className="text-2xl font-bold tracking-tight text-white">TradeForge</span>
+            <span className="text-2xl font-bold tracking-tight text-white">SetoTrading</span>
           </div>
-          <p className="text-[#9090a8] text-sm">Forge your edge</p>
+          <p className="text-[#9090a8] text-sm">Owner dashboard — payouts, evals & receipts</p>
         </div>
 
         {/* Card */}
@@ -102,7 +85,7 @@ export default function LoginPage() {
             {(["login", "signup"] as const).map((m) => (
               <button
                 key={m}
-                onClick={() => { setMode(m); setError(""); }}
+                onClick={() => { setMode(m); setError(""); setNotice(""); }}
                 className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${
                   mode === m
                     ? "bg-[#1a1a1f] text-white shadow"
@@ -170,6 +153,12 @@ export default function LoginPage() {
                 {error}
               </div>
             )}
+            {notice && (
+              <div className="flex items-start gap-2 text-xs text-[#16a34a] bg-green-500/5 border border-green-500/20 rounded-lg px-3 py-2">
+                <AlertCircle className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+                {notice}
+              </div>
+            )}
 
             <button
               type="submit"
@@ -179,22 +168,7 @@ export default function LoginPage() {
               {loading ? "Signing in..." : mode === "login" ? "Sign In" : "Create Account"}
             </button>
           </form>
-
-          <div className="mt-4 flex items-center gap-3">
-            <div className="flex-1 h-px bg-[#2a2a35]" />
-            <span className="text-xs text-[#55556a]">or</span>
-            <div className="flex-1 h-px bg-[#2a2a35]" />
-          </div>
-
-          <button
-            onClick={handleDemo}
-            disabled={demoMode}
-            className="mt-4 w-full bg-[#1a1a1f] hover:bg-[#1f1f26] border border-[#2a2a35] text-[#9090a8] hover:text-[#e8e8f0] font-medium py-2.5 rounded-lg text-sm transition-colors disabled:opacity-50"
-          >
-            {demoMode ? "Loading demo..." : "Continue with Demo Data"}
-          </button>
         </div>
-
       </div>
     </div>
   );

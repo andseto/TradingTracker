@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "TradeForge — Forge your Edge",
-  description: "Professional trading journal & analytics",
-  icons: { icon: "/anvil.png" },
+  title: "SetoTrading — Business Dashboard",
+  description: "Track payouts, eval spending, and receipts for SetoTrading",
+  icons: { icon: "/favicon.svg" },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
