@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 
 interface ModalProps {
@@ -11,6 +12,10 @@ interface ModalProps {
 }
 
 export function Modal({ open, title, onClose, children }: ModalProps) {
+  // Portal target only exists in the browser; skip the first (SSR) render.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
@@ -18,9 +23,12 @@ export function Modal({ open, title, onClose, children }: ModalProps) {
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
-  if (!open) return null;
+  if (!open || !mounted) return null;
 
-  return (
+  // Portal to <body>: ancestors with a retained CSS transform (e.g. the
+  // page-entrance animation wrapper) would otherwise become the containing
+  // block for position:fixed and push the modal off-screen.
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm anim-fade-in" onClick={onClose} />
       <div
@@ -39,6 +47,7 @@ export function Modal({ open, title, onClose, children }: ModalProps) {
         </div>
         {children}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
