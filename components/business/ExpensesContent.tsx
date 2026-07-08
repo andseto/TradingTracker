@@ -219,7 +219,7 @@ export function ExpensesContent() {
           <button
             onClick={openAdd}
             disabled={tablesMissing}
-            className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-neutral-900 text-xs font-medium rounded-lg px-3 py-2 transition-colors"
+            className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-neutral-900 text-xs font-medium rounded-lg px-3 py-2 btn-glow"
           >
             <Plus className="w-3.5 h-3.5" />
             Log Expense
@@ -254,8 +254,12 @@ export function ExpensesContent() {
                   </td>
                 </tr>
               )}
-              {filtered.map((e) => (
-                <tr key={e.id} className="border-t hover:bg-[#17171c] transition-colors" style={{ borderColor: "var(--c-border)" }}>
+              {filtered.map((e, i) => (
+                <tr
+                  key={e.id}
+                  className="border-t hover:bg-[#17171c] transition-colors anim-fade-up"
+                  style={{ borderColor: "var(--c-border)", animationDelay: `${Math.min(i * 0.03, 0.35)}s` }}
+                >
                   <td className="px-4 py-2.5 whitespace-nowrap font-mono text-xs" style={{ color: "var(--text-2)" }}>
                     {fmtDate(e.date)}
                   </td>
@@ -352,7 +356,7 @@ export function ExpensesContent() {
             <button type="button" onClick={() => setModalOpen(false)} className="text-xs font-medium border border-[#2a2a35] text-[#9090a8] hover:text-[#e8e8f0] rounded-lg px-3 py-2 transition-colors">
               Cancel
             </button>
-            <button type="submit" disabled={saving} className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-neutral-900 text-xs font-medium rounded-lg px-4 py-2 transition-colors">
+            <button type="submit" disabled={saving} className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-neutral-900 text-xs font-medium rounded-lg px-4 py-2 btn-glow">
               {saving && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
               {editing ? "Save Changes" : "Log Expense"}
             </button>

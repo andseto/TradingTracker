@@ -31,11 +31,14 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
     >
       {/* Logo */}
       <div className={cn("flex items-center h-14 px-3 border-b shrink-0", collapsed ? "justify-center" : "gap-2.5 px-4")} style={{ borderColor: "var(--c-border)" }}>
-        <div className="w-7 h-7 rounded-lg bg-amber-600/20 border border-amber-500/30 flex items-center justify-center shrink-0">
+        <div
+          className="w-7 h-7 rounded-lg bg-amber-600/20 border border-amber-500/30 flex items-center justify-center shrink-0"
+          style={{ animation: "glowPulse 4s ease-in-out infinite" }}
+        >
           <CandlestickChart className="w-4 h-4 text-amber-400" />
         </div>
         {!collapsed && (
-          <span className="font-bold text-sm tracking-tight text-white truncate">SetoTrading</span>
+          <span className="font-bold text-sm tracking-tight text-shimmer truncate">SetoTrading</span>
         )}
       </div>
 
@@ -48,11 +51,11 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
               key={href}
               href={href}
               className={cn(
-                "flex items-center rounded-lg text-sm font-medium transition-colors",
+                "flex items-center rounded-lg text-sm font-medium transition-all duration-200",
                 collapsed ? "justify-center w-full px-0 py-2.5" : "gap-2.5 px-3 py-2",
                 active
-                  ? "bg-amber-600/15 text-amber-400 border border-amber-500/20"
-                  : "text-[#9090a8] hover:text-[#e8e8f0] hover:bg-[#1a1a1f]"
+                  ? "bg-amber-600/15 text-amber-400 border border-amber-500/20 shadow-[0_0_12px_rgba(245,158,11,0.12)]"
+                  : "text-[#9090a8] hover:text-[#e8e8f0] hover:bg-[#1a1a1f] hover:translate-x-0.5"
               )}
               title={collapsed ? label : undefined}
             >

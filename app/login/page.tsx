@@ -63,23 +63,55 @@ export default function LoginPage() {
         }}
       />
       {/* Glow blobs */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-amber-600/5 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-orange-500/5 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-amber-600/5 rounded-full blur-3xl pointer-events-none anim-float" />
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-orange-500/5 rounded-full blur-3xl pointer-events-none anim-float" style={{ animationDelay: "2s" }} />
+
+      {/* Rising candlestick skyline along the bottom */}
+      <div className="absolute inset-x-0 bottom-0 h-64 pointer-events-none" aria-hidden="true">
+        {[
+          { left: "4%", h: 90, w: 14, up: true, d: 0.1 },
+          { left: "11%", h: 130, w: 14, up: false, d: 0.25 },
+          { left: "18%", h: 170, w: 14, up: true, d: 0.4 },
+          { left: "25%", h: 120, w: 14, up: true, d: 0.55 },
+          { left: "32%", h: 200, w: 14, up: false, d: 0.7 },
+          { left: "63%", h: 110, w: 14, up: true, d: 0.85 },
+          { left: "70%", h: 180, w: 14, up: false, d: 1.0 },
+          { left: "77%", h: 140, w: 14, up: true, d: 1.15 },
+          { left: "84%", h: 220, w: 14, up: true, d: 1.3 },
+          { left: "91%", h: 160, w: 14, up: false, d: 1.45 },
+        ].map((c, i) => (
+          <span
+            key={i}
+            className="candle"
+            style={{
+              left: c.left,
+              width: c.w,
+              height: c.h,
+              background: c.up ? "#16a34a" : "#ef4444",
+              animationDelay: `${c.d}s`,
+              ["--candle-opacity" as string]: c.up ? 0.16 : 0.12,
+            }}
+          />
+        ))}
+      </div>
 
       <div className="relative w-full max-w-md px-4">
         {/* Logo */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-8 anim-fade-up">
           <div className="inline-flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 rounded-xl bg-amber-600/20 border border-amber-500/30 flex items-center justify-center">
+            <div
+              className="w-10 h-10 rounded-xl bg-amber-600/20 border border-amber-500/30 flex items-center justify-center"
+              style={{ animation: "floatY 3.5s ease-in-out infinite, glowPulse 3.5s ease-in-out infinite" }}
+            >
               <CandlestickChart className="w-6 h-6 text-amber-400" />
             </div>
-            <span className="text-2xl font-bold tracking-tight text-white">SetoTrading</span>
+            <span className="text-2xl font-bold tracking-tight text-shimmer">SetoTrading</span>
           </div>
           <p className="text-[#9090a8] text-sm">Owner dashboard — payouts, evals & receipts</p>
         </div>
 
         {/* Card */}
-        <div className="bg-[#131316] border border-[#2a2a35] rounded-2xl p-8 shadow-2xl">
+        <div className="bg-[#131316] border border-[#2a2a35] rounded-2xl p-8 shadow-2xl anim-fade-up stagger-2">
           {/* Tabs */}
           <div className="flex rounded-lg bg-[#0d0d0f] p-1 mb-6">
             {(["login", "signup"] as const).map((m) => (
@@ -163,7 +195,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-amber-500 hover:bg-amber-400 disabled:opacity-50 disabled:cursor-not-allowed text-neutral-900 font-medium py-2.5 rounded-lg text-sm transition-colors"
+              className="w-full bg-amber-500 hover:bg-amber-400 disabled:opacity-50 disabled:cursor-not-allowed text-neutral-900 font-medium py-2.5 rounded-lg text-sm btn-glow"
             >
               {loading ? "Signing in..." : mode === "login" ? "Sign In" : "Create Account"}
             </button>

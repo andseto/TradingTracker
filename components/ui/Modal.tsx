@@ -22,9 +22,9 @@ export function Modal({ open, title, onClose, children }: ModalProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/60" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm anim-fade-in" onClick={onClose} />
       <div
-        className="relative w-full max-w-lg max-h-[90vh] overflow-auto rounded-2xl border p-5 shadow-2xl"
+        className="relative w-full max-w-lg max-h-[90vh] overflow-auto rounded-2xl border p-5 shadow-2xl anim-scale-in"
         style={{ background: "var(--bg-surface)", borderColor: "var(--c-border)" }}
       >
         <div className="flex items-center justify-between mb-4">

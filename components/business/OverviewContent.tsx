@@ -21,7 +21,7 @@ function MeterList({ rows }: { rows: { label: string; amount: number; share: num
   }
   return (
     <div className="space-y-2.5">
-      {rows.slice(0, 6).map((r) => (
+      {rows.slice(0, 6).map((r, i) => (
         <div key={r.label}>
           <div className="flex items-baseline justify-between text-xs mb-1">
             <span style={{ color: "var(--text-2)" }}>{r.label}</span>
@@ -29,8 +29,8 @@ function MeterList({ rows }: { rows: { label: string; amount: number; share: num
           </div>
           <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "var(--bg-elevated)" }}>
             <div
-              className="h-full rounded-full bg-amber-500"
-              style={{ width: `${Math.max(r.share * 100, 2)}%` }}
+              className="h-full rounded-full bg-gradient-to-r from-amber-500 to-amber-400 meter-grow"
+              style={{ width: `${Math.max(r.share * 100, 2)}%`, animationDelay: `${i * 0.06}s` }}
             />
           </div>
         </div>
@@ -86,35 +86,45 @@ export function OverviewContent() {
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
         <StatCard
           label="Current Capital"
-          value={fmtMoneyFull(totals.currentCapital)}
+          value={totals.currentCapital}
+          format={fmtMoneyFull}
           subValue="Seed + net profit"
           icon={Landmark}
           trend={totals.currentCapital >= Number(settings.seed_money) ? "up" : "down"}
+          className="stagger-1"
         />
         <StatCard
           label="Seed Money"
-          value={fmtMoneyFull(Number(settings.seed_money))}
+          value={Number(settings.seed_money)}
+          format={fmtMoneyFull}
           subValue="Starting capital"
           icon={PiggyBank}
+          className="stagger-2"
         />
         <StatCard
           label="Gross Profit"
-          value={fmtMoneyFull(totals.grossProfit)}
+          value={totals.grossProfit}
+          format={fmtMoneyFull}
           subValue={totals.pendingPayouts > 0 ? `+${fmtMoneyFull(totals.pendingPayouts)} pending` : "Payouts received"}
           icon={TrendingUp}
+          className="stagger-3"
         />
         <StatCard
           label="Total Spending"
-          value={fmtMoneyFull(totals.totalSpending)}
+          value={totals.totalSpending}
+          format={fmtMoneyFull}
           subValue="Evals, fees & tools"
           icon={TrendingDown}
+          className="stagger-4"
         />
         <StatCard
           label="Net Profit"
-          value={fmtMoneyFull(totals.netProfit)}
+          value={totals.netProfit}
+          format={fmtMoneyFull}
           subValue="Gross − spending"
           icon={Wallet}
           trend={totals.netProfit > 0 ? "up" : totals.netProfit < 0 ? "down" : "neutral"}
+          className="stagger-5"
         />
       </div>
 
@@ -149,23 +159,23 @@ export function OverviewContent() {
         <>
           {/* Charts */}
           <div className="grid lg:grid-cols-2 gap-4">
-            <Card title="Monthly Cash Flow" subtitle="Payouts received vs. money spent">
+            <Card title="Monthly Cash Flow" subtitle="Payouts received vs. money spent" className="stagger-3">
               <MonthlyCashFlow data={monthly} />
             </Card>
-            <Card title="Net Profit Over Time" subtitle="Cumulative payouts minus spending">
+            <Card title="Net Profit Over Time" subtitle="Cumulative payouts minus spending" className="stagger-4">
               <CumulativeNet data={cumulative} />
             </Card>
           </div>
 
           {/* Breakdowns */}
           <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
-            <Card title="Spending by Type">
+            <Card title="Spending by Type" className="stagger-5">
               <MeterList rows={byType} />
             </Card>
-            <Card title="Spending by Firm">
+            <Card title="Spending by Firm" className="stagger-6">
               <MeterList rows={byFirm} />
             </Card>
-            <Card title="Eval Scorecard" className="md:col-span-2 xl:col-span-1">
+            <Card title="Eval Scorecard" className="md:col-span-2 xl:col-span-1 stagger-7">
               <div className="grid grid-cols-2 gap-3 mb-3">
                 <div className="rounded-lg p-3" style={{ background: "var(--bg-card)" }}>
                   <div className="text-[11px] uppercase tracking-wide" style={{ color: "var(--text-3)" }}>Evals bought</div>
@@ -189,8 +199,12 @@ export function OverviewContent() {
           {/* Recent activity */}
           <Card title="Recent Activity">
             <div className="divide-y" style={{ borderColor: "var(--c-border)" }}>
-              {recent.map((r) => (
-                <div key={`${r.kind}-${r.id}`} className="flex items-center gap-3 py-2.5 first:pt-0 last:pb-0">
+              {recent.map((r, i) => (
+                <div
+                  key={`${r.kind}-${r.id}`}
+                  className="flex items-center gap-3 py-2.5 first:pt-0 last:pb-0 anim-fade-up hover:bg-white/[0.02] rounded-lg px-1 -mx-1 transition-colors"
+                  style={{ animationDelay: `${Math.min(i * 0.05, 0.4)}s` }}
+                >
                   <div
                     className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
                     style={{ background: "var(--bg-elevated)" }}

@@ -7,14 +7,15 @@ interface CardProps {
   subtitle?: string;
   actions?: React.ReactNode;
   className?: string;
+  style?: React.CSSProperties;
   children: React.ReactNode;
 }
 
-export function Card({ title, subtitle, actions, className, children }: CardProps) {
+export function Card({ title, subtitle, actions, className, style, children }: CardProps) {
   return (
     <div
-      className={cn("rounded-xl border p-4", className)}
-      style={{ background: "var(--bg-surface)", borderColor: "var(--c-border)" }}
+      className={cn("rounded-xl border p-4 card-hover anim-fade-up", className)}
+      style={{ background: "var(--bg-surface)", borderColor: "var(--c-border)", ...style }}
     >
       {(title || actions) && (
         <div className="flex items-start justify-between mb-3">

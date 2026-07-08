@@ -90,8 +90,12 @@ export function ReceiptsContent() {
         </Card>
       ) : (
         <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-3">
-          {filtered.map((d) => (
-            <Card key={`${d.source}-${d.rowId}`} className="!p-3.5">
+          {filtered.map((d, i) => (
+            <Card
+              key={`${d.source}-${d.rowId}`}
+              className="!p-3.5"
+              style={{ animationDelay: `${Math.min(i * 0.05, 0.4)}s` }}
+            >
               <div className="flex items-start gap-3">
                 <div
                   className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
