@@ -110,6 +110,7 @@ export function OverviewContent() {
           format={(n) => fmtMoneyFull(n, focusMode)}
           subValue={totals.pendingPayouts > 0 ? `+${fmtMoneyFull(totals.pendingPayouts, focusMode)} pending` : "Payouts received"}
           icon={TrendingUp}
+          trend={totals.grossProfit > 0 ? "up" : "neutral"}
           className="stagger-3"
         />
         <StatCard
