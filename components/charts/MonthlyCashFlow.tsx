@@ -4,6 +4,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
 } from "recharts";
 import { ChartTooltip } from "./ChartTooltip";
+import { useFocusMode } from "@/context/PrivacyContext";
 import { fmtMoney } from "@/lib/utils";
 import type { MonthPoint } from "@/lib/metrics";
 
@@ -13,6 +14,7 @@ const PAYOUT_COLOR = "#16a34a";
 const SPENDING_COLOR = "#ef4444";
 
 export function MonthlyCashFlow({ data }: { data: MonthPoint[] }) {
+  const { focusMode } = useFocusMode();
   return (
     <ResponsiveContainer width="100%" height={260}>
       <BarChart data={data} barGap={2} margin={{ top: 4, right: 4, left: 4, bottom: 0 }}>
@@ -22,7 +24,7 @@ export function MonthlyCashFlow({ data }: { data: MonthPoint[] }) {
           tickLine={false}
           axisLine={false}
           width={52}
-          tickFormatter={(v: number) => fmtMoney(v)}
+          tickFormatter={(v: number) => fmtMoney(v, focusMode)}
         />
         <Tooltip content={<ChartTooltip />} cursor={{ fill: "rgba(99,102,241,0.06)" }} />
         <Legend

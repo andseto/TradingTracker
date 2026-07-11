@@ -6,6 +6,7 @@ import {
   Wallet, PiggyBank, TrendingUp, TrendingDown, Landmark, ArrowUpRight, ArrowDownRight,
 } from "lucide-react";
 import { useBusiness } from "@/context/BusinessContext";
+import { useFocusMode } from "@/context/PrivacyContext";
 import { StatCard } from "@/components/ui/StatCard";
 import { Card } from "@/components/ui/Card";
 import { MonthlyCashFlow } from "@/components/charts/MonthlyCashFlow";
@@ -16,6 +17,7 @@ import {
 import { fmtMoneyFull, fmtDate } from "@/lib/utils";
 
 function MeterList({ rows }: { rows: { label: string; amount: number; share: number }[] }) {
+  const { focusMode } = useFocusMode();
   if (rows.length === 0) {
     return <p className="text-xs py-4 text-center" style={{ color: "var(--text-3)" }}>No expenses logged yet.</p>;
   }
@@ -25,7 +27,7 @@ function MeterList({ rows }: { rows: { label: string; amount: number; share: num
         <div key={r.label}>
           <div className="flex items-baseline justify-between text-xs mb-1">
             <span style={{ color: "var(--text-2)" }}>{r.label}</span>
-            <span className="font-mono" style={{ color: "var(--text-1)" }}>{fmtMoneyFull(r.amount)}</span>
+            <span className="font-mono" style={{ color: "var(--text-1)" }}>{fmtMoneyFull(r.amount, focusMode)}</span>
           </div>
           <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "var(--bg-elevated)" }}>
             <div
@@ -41,6 +43,7 @@ function MeterList({ rows }: { rows: { label: string; amount: number; share: num
 
 export function OverviewContent() {
   const { settings, expenses, payouts } = useBusiness();
+  const { focusMode } = useFocusMode();
 
   const totals = useMemo(
     () => computeTotals(Number(settings.seed_money), expenses, payouts),
@@ -87,7 +90,7 @@ export function OverviewContent() {
         <StatCard
           label="Current Capital"
           value={totals.currentCapital}
-          format={fmtMoneyFull}
+          format={(n) => fmtMoneyFull(n, focusMode)}
           subValue="Seed + net profit"
           icon={Landmark}
           trend={totals.currentCapital >= Number(settings.seed_money) ? "up" : "down"}
@@ -96,7 +99,7 @@ export function OverviewContent() {
         <StatCard
           label="Seed Money"
           value={Number(settings.seed_money)}
-          format={fmtMoneyFull}
+          format={(n) => fmtMoneyFull(n, focusMode)}
           subValue="Starting capital"
           icon={PiggyBank}
           className="stagger-2"
@@ -104,15 +107,15 @@ export function OverviewContent() {
         <StatCard
           label="Gross Profit"
           value={totals.grossProfit}
-          format={fmtMoneyFull}
-          subValue={totals.pendingPayouts > 0 ? `+${fmtMoneyFull(totals.pendingPayouts)} pending` : "Payouts received"}
+          format={(n) => fmtMoneyFull(n, focusMode)}
+          subValue={totals.pendingPayouts > 0 ? `+${fmtMoneyFull(totals.pendingPayouts, focusMode)} pending` : "Payouts received"}
           icon={TrendingUp}
           className="stagger-3"
         />
         <StatCard
           label="Total Spending"
           value={totals.totalSpending}
-          format={fmtMoneyFull}
+          format={(n) => fmtMoneyFull(n, focusMode)}
           subValue="Evals, fees & tools"
           icon={TrendingDown}
           className="stagger-4"
@@ -120,7 +123,7 @@ export function OverviewContent() {
         <StatCard
           label="Net Profit"
           value={totals.netProfit}
-          format={fmtMoneyFull}
+          format={(n) => fmtMoneyFull(n, focusMode)}
           subValue="Gross − spending"
           icon={Wallet}
           trend={totals.netProfit > 0 ? "up" : totals.netProfit < 0 ? "down" : "neutral"}
@@ -222,7 +225,7 @@ export function OverviewContent() {
                     <div className="text-xs" style={{ color: "var(--text-3)" }}>{fmtDate(r.date)}</div>
                   </div>
                   <div className={`font-mono text-sm ${r.kind === "payout" ? "text-green-400" : "text-red-400"}`}>
-                    {r.kind === "payout" ? "+" : "−"}{fmtMoneyFull(r.amount)}
+                    {r.kind === "payout" ? "+" : "−"}{fmtMoneyFull(r.amount, focusMode)}
                   </div>
                 </div>
               ))}

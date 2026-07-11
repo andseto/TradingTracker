@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { FileText, Search, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { useBusiness } from "@/context/BusinessContext";
+import { useFocusMode } from "@/context/PrivacyContext";
 import { Card } from "@/components/ui/Card";
 import { ReceiptLink } from "@/components/ui/ReceiptLink";
 import { TextInput } from "@/components/ui/fields";
@@ -11,6 +12,7 @@ import type { ReceiptDoc } from "@/types";
 
 export function ReceiptsContent() {
   const { expenses, payouts } = useBusiness();
+  const { focusMode } = useFocusMode();
   const [query, setQuery] = useState("");
 
   const docs = useMemo<ReceiptDoc[]>(() => {
@@ -121,7 +123,7 @@ export function ReceiptsContent() {
               </div>
               <div className="flex items-center justify-between mt-3 pt-3 border-t" style={{ borderColor: "var(--c-border)" }}>
                 <span className={`font-mono text-sm ${d.source === "payout" ? "text-green-400" : "text-red-400"}`}>
-                  {d.source === "payout" ? "+" : "−"}{fmtMoneyFull(d.amount)}
+                  {d.source === "payout" ? "+" : "−"}{fmtMoneyFull(d.amount, focusMode)}
                 </span>
                 <ReceiptLink path={d.path} name={d.name} />
               </div>

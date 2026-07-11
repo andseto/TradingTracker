@@ -7,6 +7,7 @@ import { Sidebar } from "./Sidebar";
 import { Header } from "./Header";
 import { MobileNav } from "./MobileNav";
 import { BusinessProvider, useBusiness } from "@/context/BusinessContext";
+import { PrivacyProvider } from "@/context/PrivacyContext";
 
 function SetupBanner() {
   const { tablesMissing } = useBusiness();
@@ -54,8 +55,10 @@ function ShellInner({ children }: { children: React.ReactNode }) {
 
 export function DashboardShell({ children }: { children: React.ReactNode }) {
   return (
-    <BusinessProvider>
-      <ShellInner>{children}</ShellInner>
-    </BusinessProvider>
+    <PrivacyProvider>
+      <BusinessProvider>
+        <ShellInner>{children}</ShellInner>
+      </BusinessProvider>
+    </PrivacyProvider>
   );
 }

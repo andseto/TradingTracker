@@ -1,15 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { Loader2, Check } from "lucide-react";
+import { Loader2, Check, Eye, EyeOff } from "lucide-react";
 import { useBusiness } from "@/context/BusinessContext";
+import { useFocusMode } from "@/context/PrivacyContext";
 import { Card } from "@/components/ui/Card";
 import { Field, TextInput } from "@/components/ui/fields";
 import { saveSettings } from "@/lib/business";
-import { fmtMoneyFull, toErrorMessage } from "@/lib/utils";
+import { cn, fmtMoneyFull, toErrorMessage } from "@/lib/utils";
 
 export function SettingsContent() {
   const { userId, settings, refresh, tablesMissing } = useBusiness();
+  const { focusMode, toggleFocusMode } = useFocusMode();
   const [businessName, setBusinessName] = useState(settings.business_name);
   const [seedMoney, setSeedMoney] = useState(String(settings.seed_money));
   const [saving, setSaving] = useState(false);
@@ -55,7 +57,7 @@ export function SettingsContent() {
           </Field>
           <p className="text-xs -mt-2" style={{ color: "var(--text-3)" }}>
             The capital you started the company with. Current capital = seed money + payouts − spending.
-            Currently {fmtMoneyFull(Number(settings.seed_money))}.
+            Currently {fmtMoneyFull(Number(settings.seed_money), focusMode)}.
           </p>
 
           {error && <p className="text-xs text-red-400">{error}</p>}
@@ -76,6 +78,36 @@ export function SettingsContent() {
             )}
           </div>
         </form>
+      </Card>
+
+      <Card title="Focus Mode" subtitle="Mask dollar amounts across the dashboard — see only whether you're up or down.">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-2.5 text-sm" style={{ color: "var(--text-2)" }}>
+            {focusMode ? <EyeOff className="w-4 h-4 text-amber-400" /> : <Eye className="w-4 h-4" />}
+            <span>
+              {focusMode
+                ? "Amounts are hidden. Green/red still shows wins and losses."
+                : "Amounts are visible everywhere."}
+            </span>
+          </div>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={focusMode}
+            onClick={toggleFocusMode}
+            className={cn(
+              "relative w-10 h-6 rounded-full transition-colors shrink-0",
+              focusMode ? "bg-amber-500" : "bg-[#2a2a35]"
+            )}
+          >
+            <span
+              className={cn(
+                "absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white transition-transform",
+                focusMode && "translate-x-4"
+              )}
+            />
+          </button>
+        </div>
       </Card>
     </div>
   );

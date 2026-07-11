@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { Plus, Pencil, Trash2, Loader2, FileSpreadsheet } from "lucide-react";
 import { useBusiness } from "@/context/BusinessContext";
+import { useFocusMode } from "@/context/PrivacyContext";
 import { Card } from "@/components/ui/Card";
 import { Modal } from "@/components/ui/Modal";
 import { Badge } from "@/components/ui/Badge";
@@ -57,6 +58,7 @@ const WINNING_DAYS_OUTCOMES = new Set(["Passed", "Payout Received"]);
 
 export function ExpensesContent() {
   const { userId, expenses, refresh, tablesMissing } = useBusiness();
+  const { focusMode } = useFocusMode();
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<Expense | null>(null);
@@ -205,7 +207,7 @@ export function ExpensesContent() {
         />
         <div className="ml-auto flex items-center gap-3">
           <span className="text-xs font-mono" style={{ color: "var(--text-2)" }}>
-            {filtered.length} · {fmtMoneyFull(filteredTotal)}
+            {filtered.length} · {fmtMoneyFull(filteredTotal, focusMode)}
           </span>
           <button
             onClick={handleExport}
@@ -270,7 +272,7 @@ export function ExpensesContent() {
                     {e.winning_days ? <DotSelector value={e.winning_days} readOnly /> : <span style={{ color: "var(--text-3)" }}>—</span>}
                   </td>
                   <td className="px-4 py-2.5 text-right font-mono text-red-400 whitespace-nowrap">
-                    −{fmtMoneyFull(Number(e.amount))}
+                    −{fmtMoneyFull(Number(e.amount), focusMode)}
                   </td>
                   <td className="px-4 py-2.5">
                     {e.receipt_path ? <ReceiptLink path={e.receipt_path} name={e.receipt_name} /> : <span style={{ color: "var(--text-3)" }}>—</span>}

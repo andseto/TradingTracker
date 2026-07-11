@@ -1,5 +1,6 @@
 "use client";
 
+import { useFocusMode } from "@/context/PrivacyContext";
 import { fmtMoneyFull } from "@/lib/utils";
 
 interface Entry {
@@ -15,6 +16,7 @@ interface ChartTooltipProps {
 }
 
 export function ChartTooltip({ active, label, payload }: ChartTooltipProps) {
+  const { focusMode } = useFocusMode();
   if (!active || !payload?.length) return null;
   return (
     <div
@@ -27,7 +29,7 @@ export function ChartTooltip({ active, label, payload }: ChartTooltipProps) {
           <span className="w-2 h-2 rounded-sm shrink-0" style={{ background: entry.color }} />
           <span style={{ color: "var(--text-2)" }}>{entry.name}</span>
           <span className="ml-auto font-mono font-medium" style={{ color: "var(--text-1)" }}>
-            {fmtMoneyFull(Number(entry.value ?? 0))}
+            {fmtMoneyFull(Number(entry.value ?? 0), focusMode)}
           </span>
         </div>
       ))}

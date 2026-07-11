@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { Plus, Pencil, Trash2, Loader2 } from "lucide-react";
 import { useBusiness } from "@/context/BusinessContext";
+import { useFocusMode } from "@/context/PrivacyContext";
 import { Card } from "@/components/ui/Card";
 import { Modal } from "@/components/ui/Modal";
 import { Badge } from "@/components/ui/Badge";
@@ -50,6 +51,7 @@ function formFromPayout(p: Payout): FormState {
 
 export function PayoutsContent() {
   const { userId, payouts, refresh, tablesMissing } = useBusiness();
+  const { focusMode } = useFocusMode();
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<Payout | null>(null);
@@ -173,7 +175,7 @@ export function PayoutsContent() {
         />
         <div className="ml-auto flex items-center gap-3">
           <span className="text-xs font-mono" style={{ color: "var(--text-2)" }}>
-            {filtered.length} · {fmtMoneyFull(filteredTotal)}
+            {filtered.length} · {fmtMoneyFull(filteredTotal, focusMode)}
           </span>
           <button
             onClick={openAdd}
@@ -225,7 +227,7 @@ export function PayoutsContent() {
                   <td className="px-4 py-2.5" style={{ color: "var(--text-2)" }}>{p.method ?? "—"}</td>
                   <td className="px-4 py-2.5"><Badge value={p.status} /></td>
                   <td className="px-4 py-2.5 text-right font-mono text-green-400 whitespace-nowrap">
-                    +{fmtMoneyFull(Number(p.amount))}
+                    +{fmtMoneyFull(Number(p.amount), focusMode)}
                   </td>
                   <td className="px-4 py-2.5">
                     {p.receipt_path ? <ReceiptLink path={p.receipt_path} name={p.receipt_name} /> : <span style={{ color: "var(--text-3)" }}>—</span>}
