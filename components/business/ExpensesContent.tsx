@@ -81,16 +81,28 @@ export function ExpensesContent() {
     return [...set].sort();
   }, [expenses]);
 
+  // Failed evals are hidden unless the outcome filter explicitly asks for
+  // them — dwelling on losses in the default view isn't great for morale.
   const filtered = useMemo(
     () =>
       expenses.filter(
         (e) =>
           (!filterFirm || e.firm === filterFirm) &&
           (!filterType || e.expense_type === filterType) &&
-          (!filterOutcome || e.outcome === filterOutcome)
+          (filterOutcome ? e.outcome === filterOutcome : e.outcome !== "Failed")
       ),
     [expenses, filterFirm, filterType, filterOutcome]
   );
+
+  const hiddenFailedCount = useMemo(() => {
+    if (filterOutcome) return 0;
+    return expenses.filter(
+      (e) =>
+        e.outcome === "Failed" &&
+        (!filterFirm || e.firm === filterFirm) &&
+        (!filterType || e.expense_type === filterType)
+    ).length;
+  }, [expenses, filterFirm, filterType, filterOutcome]);
 
   const filteredTotal = filtered.reduce((s, e) => s + Number(e.amount), 0);
 
@@ -205,6 +217,15 @@ export function ExpensesContent() {
           onChange={(e) => setFilterOutcome(e.target.value)}
           className="!w-auto min-w-[140px]"
         />
+        {hiddenFailedCount > 0 && (
+          <button
+            onClick={() => setFilterOutcome("Failed")}
+            className="text-xs hover:underline"
+            style={{ color: "var(--text-3)" }}
+          >
+            {hiddenFailedCount} failed hidden — show
+          </button>
+        )}
         <div className="ml-auto flex items-center gap-3">
           <span className="text-xs font-mono" style={{ color: "var(--text-2)" }}>
             {filtered.length} · {fmtMoneyFull(filteredTotal, focusMode)}
